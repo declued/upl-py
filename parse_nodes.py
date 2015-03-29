@@ -1,11 +1,18 @@
 from enum import Enum
 
 class ParseNode:
-    pass
+    def to_dict(self):
+        return None
 
 class ProgramNode(ParseNode):
     def __init__(self, statements):
         self.statements = statements
+
+    def to_dict(self):
+        return dict(
+            type = "ProgramNode",
+            statements = [s.to_dict() for s in self.statements]
+        )
 
 class StatementNode(ParseNode):
     pass
@@ -16,6 +23,14 @@ class DeclNode(StatementNode):
         self.identifier = identifier
         self.expression = expression
 
+    def to_dict(self):
+        return dict(
+            type = "DeclNode",
+            declarator = str(self.declarator),
+            identifier = self.identifier,
+            expression = self.expression.to_dict()
+        )
+
 class ExpressionNode(StatementNode):
     pass
 
@@ -25,20 +40,51 @@ class FuncDefNode(ExpressionNode):
         self.return_type = return_type
         self.statements = statements
 
-class LiteralType(Enum):
-    Boolean     = 0
-    Integer     = 1
-    Real        = 2
+    def to_dict(self):
+        # TODO
+        return None
 
 class LiteralNode(ExpressionNode):
-    def __init__(self, type, value):
-        self.type = type
+    pass
+
+class BoolLiteralNode(LiteralNode):
+    def __init__(self, value):
         self.value = value
+
+    def to_dict(self):
+        return dict(
+            type = "BoolLiteralNode",
+            value = self.value
+        )
+
+class IntLiteralNode(LiteralNode):
+    def __init__(self, value):
+        self.value = value
+
+    def to_dict(self):
+        return dict(
+            type = "IntLiteralNode",
+            value = self.value
+        )
+
+class RealLiteralNode(LiteralNode):
+    def __init__(self, value):
+        self.value = value
+
+    def to_dict(self):
+        return dict(
+            type = "RealLiteralNode",
+            value = self.value
+        )
 
 class FuncCallNode(ExpressionNode):
     def __init_(self, name, args):
         self.name = name
         self.args = args
+
+    def to_dict(self):
+        # TODO
+        return None
 
 class BinaryOperationNode(ExpressionNode):
     def __init__(self, operator, left_operand, right_operand):
@@ -46,7 +92,15 @@ class BinaryOperationNode(ExpressionNode):
         self.left_operand = left_operand
         self.right_operand = right_operand
 
+    def to_dict(self):
+        # TODO
+        return None
+
 class UnaryOperationNode(ExpressionNode):
     def __init__(self, operator, operand):
         self.operator = operator
         self.operand = operand
+
+    def to_dict(self):
+        # TODO
+        return None
