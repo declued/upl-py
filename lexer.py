@@ -1,25 +1,28 @@
 import re
 from token import TokenType, Token
 
+DEFAULT_VALUE_FUNC = lambda v: None
+
+# Regular expressions and uncooked->value functions. Note that order matters here.
 token_lex_info_list = (
     (TokenType.BoolLiteral, r"(false|true)", lambda v: v == "true"),
-    (TokenType.IntLiteral, r"\d+", lambda v: int(v)),
     (TokenType.RealLiteral, r"\d+\.\d+(e[-+]?\d+)?", lambda v: float(v)),
+    (TokenType.IntLiteral, r"\d+", lambda v: int(v)),
     (TokenType.StringLiteral, r'\"(\\.|[^\\"])*\"', lambda v: eval(v)),
-    (TokenType.Identifier, r"[A-Za-z][A-Za-z0-9]*", lambda v: v),
-    (TokenType.OpenParen, r"\(", None),
-    (TokenType.CloseParen, r"\)", None),
-    (TokenType.Assignment, r"=", None),
-    (TokenType.StatementSep, r";", None),
-    (TokenType.ArgumentSep, r",", None),
-    (TokenType.ReturnsSep, r"->", None),
+    (TokenType.OpenParen, r"\(", DEFAULT_VALUE_FUNC),
+    (TokenType.CloseParen, r"\)", DEFAULT_VALUE_FUNC),
+    (TokenType.Assignment, r"=", DEFAULT_VALUE_FUNC),
+    (TokenType.StatementSep, r";", DEFAULT_VALUE_FUNC),
+    (TokenType.ArgumentSep, r",", DEFAULT_VALUE_FUNC),
+    (TokenType.ReturnsSep, r"->", DEFAULT_VALUE_FUNC),
     (TokenType.Operator, r"[!@#$%^&*-+/=<>]+", lambda v: v),
-    (TokenType.KeywordDef, r"def", None),
-    (TokenType.KeywordVar, r"var", None),
-    (TokenType.KeywordBool, r"bool", None),
-    (TokenType.KeywordInt, r"int", None),
-    (TokenType.KeywordReal, r"real", None),
-    (TokenType.KeywordFunc, r"func", None),
+    (TokenType.KeywordDef, r"def", DEFAULT_VALUE_FUNC),
+    (TokenType.KeywordVar, r"var", DEFAULT_VALUE_FUNC),
+    (TokenType.KeywordBool, r"bool", DEFAULT_VALUE_FUNC),
+    (TokenType.KeywordInt, r"int", DEFAULT_VALUE_FUNC),
+    (TokenType.KeywordReal, r"real", DEFAULT_VALUE_FUNC),
+    (TokenType.KeywordFunc, r"func", DEFAULT_VALUE_FUNC),
+    (TokenType.Identifier, r"[A-Za-z][A-Za-z0-9]*", lambda v: v),
 )
 
 
@@ -57,17 +60,12 @@ def tokenize_line(line):
     # check for the first token
     for token_type, token_regex, value_func in token_lex_info_list:
         match = re.match(token_regex, line)
-        if match is None:
-            continue
-
-        uncooked = match.group(0)
-
-        if value_func is not None:
-            value = value_func(uncooked)
-        else:
-            value = None
-
-        first_token = Token(token_type, value, uncooked)
+        if match is not None:
+            uncooked = match.group(0)
+            first_token = Token(type = token_type,
+                                value = value_func(uncooked),
+                                uncooked = uncooked)
+            break
 
     if first_token is None:
         return [Token(TokenType.Error)]
@@ -77,6 +75,6 @@ def tokenize_line(line):
 
 
 if __name__ == "__main__":
-    for token in tokenize_program("def x = 42;"):
+    for token in tokenize_program("def x = 42+8.0 * 98+a;"):
         print token
 
