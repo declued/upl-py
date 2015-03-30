@@ -74,10 +74,6 @@ class Parser(object):
         if len(tokens) < 4:
             return None
 
-        declarator = None
-        identifier = None
-        expression = None
-
         # match the declarator
         if tokens[0].type not in (TokenType.KeywordDef, TokenType.KeywordVar,
                                   TokenType.KeywordBool, TokenType.KeywordInt,
@@ -96,12 +92,12 @@ class Parser(object):
         if tokens[2].type != TokenType.Assignment:
             return None
 
-        # match the right hand side
-        rhs = self.parse_expression(tokens[3:])
-        if rhs is None:
+        # match the expression
+        expression = self.parse_expression(tokens[3:])
+        if expression is None:
             return None
 
-        declaration = DeclNode(declarator, identifier, rhs)
+        declaration = DeclNode(declarator, identifier, expression)
         return declaration
 
     def get_first_statement(self, tokens):
