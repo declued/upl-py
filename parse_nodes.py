@@ -93,8 +93,12 @@ class BinaryOperationNode(ExpressionNode):
         self.right_operand = right_operand
 
     def to_dict(self):
-        # TODO
-        return None
+        return dict(
+            type = "BinaryOperationNode",
+            operator = self.operator,
+            left_operand = self.left_operand.to_dict(),
+            right_operand = self.right_operand.to_dict()
+        )
 
 class UnaryOperationNode(ExpressionNode):
     def __init__(self, operator, operand):
@@ -102,5 +106,9 @@ class UnaryOperationNode(ExpressionNode):
         self.operand = operand
 
     def to_dict(self):
-        # TODO
+        return dict(
+            type = "UnaryOperationNode",
+            operator = self.operator,
+            operand = self.operand.to_dict()
+        )
         return None
