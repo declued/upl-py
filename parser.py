@@ -20,12 +20,11 @@ operator_groups = (
 class Parser(object):
     def __init__(self, tokens):
         self.tokens = tokens
-        self.token_index = 0
 
     def parse(self):
-        return self.parse_program()
+        return self.parse_program(tokens)
 
-    def parse_program(self):
+    def parse_program(self, tokens):
         """
         On success returns a program, otherwise returns None.
 
@@ -34,45 +33,34 @@ class Parser(object):
         statements = []
         error = False
 
-        while self.token_index < len(self.tokens):
-            statement = self.parse_statement()
+        while len(tokens) > 0:
+            statement_tokens = self.get_first_statement(tokens)
+            statement = self.parse_statement(statement_tokens)
             if statement is not None:
                 statements.append(statement)
+                tokens = tokens[len(statement_tokens) + 1:]
             else:
                 error = True
                 break
 
         if error:
-            result = None
+            program = None
         else:
-            result = ProgramNode(statements)
+            program = ProgramNode(statements)
 
-        return result
+        return program
 
-    def parse_statement(self):
+    def parse_statement(self, tokens):
         """
         On success returns a statement and increments token_index, otherwise
         returns None.
 
         statement := declaration ";" | expression ";";
         """
-        statement_tokens = self.get_current_statement()
+        statement = self.parse_declaration(tokens) or\
+                    self.parse_expression(tokens)
 
-        # a statement is a declaration or an expression
-        statement = self.parse_declaration(statement_tokens)
-        if statement is None:
-            statement = self.parse_expression(statement_tokens)
-
-        if statement is None:
-            # if we couldn't match a declaration or an expression, it's an error
-            self.error = True
-            result = None
-        else:
-            # all is good
-            self.token_index += len(statement_tokens) + 1
-            result = statement
-
-        return result
+        return statement
 
     def parse_declaration(self, tokens):
         """
@@ -86,7 +74,6 @@ class Parser(object):
         if len(tokens) < 4:
             return None
 
-        initial_token_index = self.token_index
         declarator = None
         identifier = None
         expression = None
@@ -117,24 +104,24 @@ class Parser(object):
         declaration = DeclNode(declarator, identifier, rhs)
         return declaration
 
-    def get_current_statement(self):
+    def get_first_statement(self, tokens):
         """
         Returns the statement which starts at the current token.
         """
-        tokens = []
+        statement_tokens = []
         balance = 0
-        for token in self.tokens[self.token_index:]:
+        for token in tokens:
             if token.type == TokenType.StatementSep and balance == 0:
                 break
 
-            tokens.append(token)
+            statement_tokens.append(token)
 
             if token.type == TokenType.OpenBracket:
                 balance += 1
             elif token.type == TokenType.CloseBracket:
                 balance -= 1
 
-        return tokens
+        return statement_tokens
 
     def parse_expression(self, tokens):
         """
