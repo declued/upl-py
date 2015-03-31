@@ -56,7 +56,7 @@ class BasicTypeNode(TypeNode):
     def to_dict(self):
         return dict(
             type = "BasicTypeNode",
-            type_name = self.type
+            type_name = str(self.type)
         )
 
 class FuncTypeNode(TypeNode):
@@ -66,7 +66,9 @@ class FuncTypeNode(TypeNode):
 
     def to_dict(self):
         return dict(
-            type = "FuncTypeNode"
+            type = "FuncTypeNode",
+            return_type = self.return_type.to_dict(),
+            args = [(name, type.to_dict()) for name, type in self.arg_list]
         )
 
 class LiteralNode(ExpressionNode):

@@ -17,6 +17,7 @@ token_lex_info_list = (
     (TokenType.StatementSep, r";", DEFAULT_VALUE_FUNC),
     (TokenType.ArgumentSep, r",", DEFAULT_VALUE_FUNC),
     (TokenType.ReturnsSep, r"->", DEFAULT_VALUE_FUNC),
+    (TokenType.TypeSep, r":", DEFAULT_VALUE_FUNC),
     (TokenType.Operator, r"[!@#$%^&*\-+/=<>]+", lambda v: v),
     (TokenType.KeywordDef, r"def", DEFAULT_VALUE_FUNC),
     (TokenType.KeywordVar, r"var", DEFAULT_VALUE_FUNC),

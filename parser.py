@@ -235,7 +235,6 @@ class Parser(object):
         function_def := function_type "{" function_body "}"
         """
         idxs = self.find_delimiters(tokens, TokenType.OpenBracket)
-        print [t.type for t in tokens], idxs
         if len(idxs) != 1 or tokens[-1].type != TokenType.CloseBracket:
             return None
 
@@ -255,14 +254,80 @@ class Parser(object):
 
         function_type := "(" arg_list ")" "->" type;
         """
-        print "parse_function_type", tokens
         idxs = self.find_delimiters(tokens, TokenType.ReturnsSep)
         if len(idxs) != 1 or idxs[0] < 2 or\
            tokens[0].type != TokenType.OpenParen or\
            tokens[idxs[0] - 1].type != TokenType.CloseParen:
            return None
 
-        return FuncTypeNode([], None)
+        arg_list = self.parse_function_def_args(tokens[1:idxs[0]-1])
+        return_type = self.parse_basic_type(tokens[idxs[0]+1:])
+
+        function_type = FuncTypeNode(arg_list, return_type)
+
+        return function_type
+
+    def parse_function_def_args(self, tokens):
+        """
+        On success returns list of function definition args, otherwise
+        returns None.
+
+        arg_list := (empty) | arg ("," arg)*;
+        """
+        if len(tokens) == 0:
+            return []
+
+        separator_indices = self.find_delimiters(tokens, TokenType.ArgumentSep)
+        separator_indices.append(len(tokens))
+
+        start = 0
+        arg_list = []
+        for separator_index in separator_indices:
+            arg_tokens = tokens[start: separator_index]
+            
+            arg = self.parse_typed_var(arg_tokens)
+            if arg is None:
+                return None
+
+            arg_list.append(arg)
+            start = separator_index + 1
+
+        return arg_list
+
+    def parse_typed_var(self, tokens):
+        """
+        On success returns a identifier/type pair, otherwise returns None.
+
+        typed_var := identifier ":" type;
+        """
+        if len(tokens) < 3 or\
+           tokens[0].type != TokenType.Identifier or\
+           tokens[1].type != TokenType.TypeSep:
+           return None
+
+        type = self.parse_basic_type(tokens[2:])
+        if type is None:
+            return None
+
+        identifier = tokens[0].value
+        typed_var = (identifier, type)
+
+        return typed_var
+
+    def parse_basic_type(self, tokens):
+        """
+        On success returns a basic type, otherwise returns None.
+
+        basic_type := "bool" | "int" | "real";
+        """
+        if len(tokens) != 1 or\
+           tokens[0].type not in (TokenType.KeywordBool, TokenType.KeywordInt,
+                                  TokenType.KeywordReal):
+            return None
+        
+        basic_type = BasicTypeNode(tokens[0].type)
+
+        return basic_type
 
     def parse_literal(self, tokens):
         """
@@ -314,7 +379,7 @@ class Parser(object):
 
 if __name__ == "__main__":
     program = """
-        var f = () -> int { 4 + 1; }
+        var f = (a: int) -> int { 4 + 1; }
     """
 
     tokens = tokenize_program(program)
