@@ -179,7 +179,48 @@ class Parser(object):
         return unary_operation
 
     def parse_function_call(self, tokens):
-        return None
+        """
+        On success returns a function call, otherwise returns None.
+
+        function_call := identifier "(" arg_list ")";
+        """
+        if len(tokens) < 3 or\
+           tokens[0].type != TokenType.Identifier or\
+           tokens[1].type != TokenType.OpenParen or\
+           tokens[-1].type != TokenType.CloseParen:
+            return None
+
+        name = tokens[0].value
+        args = self.parse_function_call_args(tokens[2:-1])
+        if args is None:
+            return None
+
+        function_call = FuncCallNode(name, args)
+        return function_call
+
+    def parse_function_call_args(self, tokens):
+        """
+        On success returns a list of expressions, otherwise returns None.
+
+        arg_list := (empty) | expression ("," expression)*;
+        """
+        if len(tokens) == 0:
+            return []
+
+        separator_indices = self.find_delimiters(tokens, TokenType.ArgumentSep)
+        separator_indices.append(len(tokens))
+
+        start = 0
+        arg_list = []
+        for separator_index in separator_indices:
+            arg = self.parse_expression(tokens[start:separator_index])
+            if arg is None:
+                return None
+
+            arg_list.append(arg)
+            start = separator_index + 1
+
+        return arg_list
 
     def parse_function_def(self, tokens):
         return None
@@ -207,6 +248,9 @@ class Parser(object):
         return literal
 
     def find_delimiters(self, tokens, type, skip=0):
+        """
+        Returns the indices at which tokens can be split by tokens of given type.
+        """
         result = []
         balance = 0
         for i, token in enumerate(tokens):
@@ -224,7 +268,7 @@ class Parser(object):
 
 if __name__ == "__main__":
     program = """
-        var a = -1+5;
+        var a = some_function(-1+5, 4, 5);
         int x = 10;
         bool v=true;
         def abc123 = (1 + 2) * 3 + (4 * 5);

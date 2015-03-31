@@ -78,13 +78,16 @@ class RealLiteralNode(LiteralNode):
         )
 
 class FuncCallNode(ExpressionNode):
-    def __init_(self, name, args):
+    def __init__(self, name, args):
         self.name = name
         self.args = args
 
     def to_dict(self):
-        # TODO
-        return None
+        return dict(
+            type = "FuncCallNode",
+            name = self.name,
+            args = [arg.to_dict() for arg in self.args]
+        )
 
 class BinaryOperationNode(ExpressionNode):
     def __init__(self, operator, left_operand, right_operand):
