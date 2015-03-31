@@ -18,9 +18,10 @@ class StatementNode(ParseNode):
     pass
 
 class DeclNode(StatementNode):
-    def __init__(self, declarator, identifier, expression):
+    def __init__(self, declarator, identifier, type, expression):
         self.declarator = declarator
         self.identifier = identifier
+        self.type = type
         self.expression = expression
 
     def to_dict(self):
@@ -28,6 +29,7 @@ class DeclNode(StatementNode):
             type = "DeclNode",
             declarator = str(self.declarator),
             identifier = self.identifier,
+            identifier_type = self.type.to_dict(),
             expression = self.expression.to_dict()
         )
 
@@ -57,6 +59,12 @@ class BasicTypeNode(TypeNode):
         return dict(
             type = "BasicTypeNode",
             type_name = str(self.type)
+        )
+
+class InferredTypeNode(TypeNode):
+    def to_dict(self):
+        return dict(
+            type = "InferredTypeNode"
         )
 
 class FuncTypeNode(TypeNode):

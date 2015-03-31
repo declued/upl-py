@@ -4,7 +4,7 @@ import json
 from parse_nodes import ProgramNode, DeclNode, FuncDefNode, BoolLiteralNode,\
                         IntLiteralNode, RealLiteralNode, FuncCallNode,\
                         BinaryOperationNode, UnaryOperationNode,\
-                        FuncTypeNode, BasicTypeNode
+                        FuncTypeNode, BasicTypeNode, InferredTypeNode
 
 operator_groups = (
     ('||', '^^', '&&'),
@@ -72,17 +72,15 @@ class Parser(object):
         On success returns a declaration and increments the token_index, otherwise
         returns None.
 
-        declaration := declarator identifier "=" expression;
-        declarator := "def" | "var" | typename;
+        declaration := declarator identifier [":" typename] "=" expression;
+        declarator := "def" | "var";
         typename := "bool" | "int" | "real";
         """
         if len(tokens) < 4:
             return None
 
         # match the declarator
-        if tokens[0].type not in (TokenType.KeywordDef, TokenType.KeywordVar,
-                                  TokenType.KeywordBool, TokenType.KeywordInt,
-                                  TokenType.KeywordReal):
+        if tokens[0].type not in (TokenType.KeywordDef, TokenType.KeywordVar):
             return None
         else:
             declarator = tokens[0].type
@@ -94,15 +92,25 @@ class Parser(object):
             identifier = tokens[1].value
 
         # match the assignment sign
-        if tokens[2].type != TokenType.Assignment:
+        idxs = self.find_delimiters(tokens, TokenType.Assignment)
+        if len(idxs) == 0:
+            return None
+
+        # match the type
+        if tokens[2].type == TokenType.TypeSep:
+            type = self.parse_basic_type(tokens[3:idxs[0]])
+        else:
+            type = InferredTypeNode()
+
+        if type is None:
             return None
 
         # match the expression
-        expression = self.parse_expression(tokens[3:])
+        expression = self.parse_expression(tokens[idxs[0] + 1:])
         if expression is None:
             return None
 
-        declaration = DeclNode(declarator, identifier, expression)
+        declaration = DeclNode(declarator, identifier, type, expression)
         return declaration
 
     def get_first_statement(self, tokens):
@@ -379,7 +387,7 @@ class Parser(object):
 
 if __name__ == "__main__":
     program = """
-        var f = (a: int) -> int { 4 + 1; }
+        def a: int = 1;
     """
 
     tokens = tokenize_program(program)
