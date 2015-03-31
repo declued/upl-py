@@ -104,18 +104,12 @@ class Parser(object):
         """
         Returns the statement which starts at the current token.
         """
-        statement_tokens = []
-        balance = 0
-        for token in tokens:
-            if token.type == TokenType.StatementSep and balance == 0:
-                break
+        separator_indices = self.find_delimiters(tokens, TokenType.StatementSep)
 
-            statement_tokens.append(token)
-
-            if token.type == TokenType.OpenBracket:
-                balance += 1
-            elif token.type == TokenType.CloseBracket:
-                balance -= 1
+        if len(separator_indices) == 0:
+            statement_tokens = tokens
+        else:
+            statement_tokens = tokens[:separator_indices[0]]
 
         return statement_tokens
 
