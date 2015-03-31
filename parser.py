@@ -3,7 +3,8 @@ from lexer import tokenize_program
 import json
 from parse_nodes import ProgramNode, DeclNode, FuncDefNode, BoolLiteralNode,\
                         IntLiteralNode, RealLiteralNode, FuncCallNode,\
-                        BinaryOperationNode, UnaryOperationNode
+                        BinaryOperationNode, UnaryOperationNode,\
+                        FuncTypeNode, BasicTypeNode
 
 operator_groups = (
     ('||', '^^', '&&'),
@@ -30,8 +31,18 @@ class Parser(object):
 
         program := statement [| program];
         """
+        statements = self.parse_statement_list(tokens)
+        if statements is None:
+            return None
+
+        program = ProgramNode(statements)
+        return program
+
+    def parse_statement_list(self, tokens):
+        """
+        On success returns a list of statements, otherwise returns None.
+        """
         statements = []
-        error = False
 
         while len(tokens) > 0:
             statement_tokens = self.get_first_statement(tokens)
@@ -40,15 +51,9 @@ class Parser(object):
                 statements.append(statement)
                 tokens = tokens[len(statement_tokens) + 1:]
             else:
-                error = True
-                break
+                return None
 
-        if error:
-            program = None
-        else:
-            program = ProgramNode(statements)
-
-        return program
+        return statements
 
     def parse_statement(self, tokens):
         """
@@ -226,8 +231,38 @@ class Parser(object):
     def parse_function_def(self, tokens):
         """
         On success returns a function definition, otherwise returns None.
+
+        function_def := function_type "{" function_body "}"
         """
-        return None
+        idxs = self.find_delimiters(tokens, TokenType.OpenBracket)
+        print [t.type for t in tokens], idxs
+        if len(idxs) != 1 or tokens[-1].type != TokenType.CloseBracket:
+            return None
+
+        function_type = self.parse_function_type(tokens[:idxs[0]])
+        function_body = self.parse_statement_list(tokens[idxs[0] + 1:-1])
+
+        if function_type is None or function_body is None:
+            return None
+
+        function_def = FuncDefNode(function_type, function_body)
+
+        return function_def
+
+    def parse_function_type(self, tokens):
+        """
+        On success returns a function type, otherwise returns None.
+
+        function_type := "(" arg_list ")" "->" type;
+        """
+        print "parse_function_type", tokens
+        idxs = self.find_delimiters(tokens, TokenType.ReturnsSep)
+        if len(idxs) != 1 or idxs[0] < 2 or\
+           tokens[0].type != TokenType.OpenParen or\
+           tokens[idxs[0] - 1].type != TokenType.CloseParen:
+           return None
+
+        return FuncTypeNode([], None)
 
     def parse_literal(self, tokens):
         """
@@ -258,12 +293,13 @@ class Parser(object):
         result = []
         balance = 0
         for i, token in enumerate(tokens):
+            if token.type == type and balance == 0 and i >= skip:
+                result.append(i)
+
             if token.type in (TokenType.OpenParen, TokenType.OpenBracket):
                 balance += 1
             elif token.type in (TokenType.CloseParen, TokenType.CloseBracket):
                 balance -= 1
-            elif token.type == type and balance == 0 and i >= skip:
-                result.append(i)
 
         return result
 
@@ -278,7 +314,7 @@ class Parser(object):
 
 if __name__ == "__main__":
     program = """
-        (1 + 2) * 3 + (4 * 5) + 5;
+        var f = () -> int { 4 + 1; }
     """
 
     tokens = tokenize_program(program)

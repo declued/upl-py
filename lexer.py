@@ -9,6 +9,8 @@ token_lex_info_list = (
     (TokenType.RealLiteral, r"\d+\.\d+(e[-+]?\d+)?", lambda v: float(v)),
     (TokenType.IntLiteral, r"\d+", lambda v: int(v)),
     (TokenType.StringLiteral, r'\"(\\.|[^\\"])*\"', lambda v: eval(v)),
+    (TokenType.OpenBracket, r"{", DEFAULT_VALUE_FUNC),
+    (TokenType.CloseBracket, r"}", DEFAULT_VALUE_FUNC),
     (TokenType.OpenParen, r"\(", DEFAULT_VALUE_FUNC),
     (TokenType.CloseParen, r"\)", DEFAULT_VALUE_FUNC),
     (TokenType.Assignment, r"=", DEFAULT_VALUE_FUNC),

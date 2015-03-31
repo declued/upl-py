@@ -35,14 +35,39 @@ class ExpressionNode(StatementNode):
     pass
 
 class FuncDefNode(ExpressionNode):
-    def __init__(self, arg_list, return_type, statements):
-        self.arg_list = arg_list
-        self.return_type = return_type
+    def __init__(self, type, statements):
+        self.type = type
         self.statements = statements
 
     def to_dict(self):
-        # TODO
-        return None
+        return dict(
+            type = "FuncDefNode",
+            func_type = self.type.to_dict(),
+            statements = [s.to_dict() for s in self.statements]
+        )
+
+class TypeNode(ParseNode):
+    pass
+
+class BasicTypeNode(TypeNode):
+    def __init__(self, type):
+        self.type = type
+
+    def to_dict(self):
+        return dict(
+            type = "BasicTypeNode",
+            type_name = self.type
+        )
+
+class FuncTypeNode(TypeNode):
+    def __init__(self, arg_list, return_type):
+        self.arg_list = arg_list
+        self.return_type = return_type
+
+    def to_dict(self):
+        return dict(
+            type = "FuncTypeNode"
+        )
 
 class LiteralNode(ExpressionNode):
     pass
