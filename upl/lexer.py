@@ -18,13 +18,12 @@ token_lex_info_list = (
     (TokenType.ArgumentSep, r",", DEFAULT_VALUE_FUNC),
     (TokenType.ReturnsSep, r"->", DEFAULT_VALUE_FUNC),
     (TokenType.TypeSep, r":", DEFAULT_VALUE_FUNC),
-    (TokenType.Operator, r"[!@#$%^&*\-+/=<>]+", lambda v: v),
+    (TokenType.Operator, r"[~\!@$%^&*\-+/=<>|]+", lambda v: v),
     (TokenType.KeywordDef, r"def", DEFAULT_VALUE_FUNC),
     (TokenType.KeywordVar, r"var", DEFAULT_VALUE_FUNC),
     (TokenType.KeywordBool, r"bool", DEFAULT_VALUE_FUNC),
     (TokenType.KeywordInt, r"int", DEFAULT_VALUE_FUNC),
     (TokenType.KeywordReal, r"real", DEFAULT_VALUE_FUNC),
-    (TokenType.KeywordFunc, r"func", DEFAULT_VALUE_FUNC),
     (TokenType.Identifier, r"[A-Za-z][A-Za-z0-9_]*", lambda v: v),
 )
 
@@ -65,10 +64,11 @@ def tokenize_line(line):
         match = re.match(token_regex, line)
         if match is not None:
             uncooked = match.group(0)
-            first_token = Token(type = token_type,
-                                value = value_func(uncooked),
-                                uncooked = uncooked)
-            break
+            if first_token is None or\
+               len(first_token.uncooked) < len(uncooked):
+                first_token = Token(type = token_type,
+                                    value = value_func(uncooked),
+                                    uncooked = uncooked)
 
     if first_token is None:
         return [Token(TokenType.Error)]

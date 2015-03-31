@@ -22,8 +22,7 @@ class TokenType(Enum):
     KeywordBool     = 17
     KeywordInt      = 18
     KeywordReal     = 19
-    KeywordFunc     = 20
-    TypeSep         = 21
+    TypeSep         = 20
 
 
 class Token:
