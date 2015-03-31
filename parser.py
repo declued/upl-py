@@ -123,13 +123,19 @@ class Parser(object):
         """
         On success returns an expression, otherwise returns None.
 
-        expression := binary_operation | unary_operation | func_call | func_def | literal;
+        expression := binary_operation | unary_operation | func_call | func_def |
+                      literal | "(" expression ")";
         """
         expression = self.parse_binary_operation(tokens) or\
                      self.parse_unary_operation(tokens) or\
                      self.parse_function_call(tokens) or\
                      self.parse_function_def(tokens) or\
                      self.parse_literal(tokens)
+
+        if expression is None and\
+           tokens[0].type == TokenType.OpenParen and\
+           tokens[-1].type == TokenType.CloseParen:
+           expression = self.parse_expression(tokens[1:-1])
 
         return expression
 
@@ -222,11 +228,17 @@ class Parser(object):
         return 1
 
 if __name__ == "__main__":
-    program = "var a = -1+5;int x = 10;bool v=true;1+3;"
+    program = """
+        var a = -1+5;
+        int x = 10;
+        bool v=true;
+        def abc123 = (1 + 2) * 3 + (4 * 5);
+        1+3;
+    """
 
     tokens = tokenize_program(program)
     parse_tree = Parser(tokens).parse()
     if parse_tree is None:
         print "parse error"
     else:
-        print json.dumps(parse_tree.to_dict(), indent=2)
+        print json.dumps(parse_tree.to_dict(), indent=2, sort_keys=True)
