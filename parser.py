@@ -146,23 +146,11 @@ class Parser(object):
         binary_operation := expression operator expression;
         """
         # find highest priority operator
-        operator_index = None
-        operator_priority = 100
-        balance = 0
-
-        for i, token in enumerate(tokens):
-            if token.type == TokenType.OpenParen:
-                balance += 1
-            elif token.type == TokenType.CloseParen:
-                balance -= 1
-            elif token.type == TokenType.Operator and balance == 0 and i > 0:
-                priority = self.get_operator_priority(token.value)
-                if priority < operator_priority:
-                    operator_index = i
-                    operator_priority = priority
-
-        if operator_index is None:
+        operator_indices = self.find_delimiters(tokens, TokenType.Operator, 1)
+        if len(operator_indices) == 0:
             return None
+
+        operator_index = min(operator_indices, key=self.get_operator_priority)
 
         # parse left operand and right operand
         operator = tokens[operator_index].value
@@ -224,6 +212,19 @@ class Parser(object):
 
         return literal
 
+    def find_delimiters(self, tokens, type, skip=0):
+        result = []
+        balance = 0
+        for i, token in enumerate(tokens):
+            if token.type in (TokenType.OpenParen, TokenType.OpenBracket):
+                balance += 1
+            elif token.type in (TokenType.CloseParen, TokenType.CloseBracket):
+                balance -= 1
+            elif token.type == type and balance == 0 and i >= skip:
+                result.append(i)
+
+        return result
+
     def get_operator_priority(self, operator):
         return 1
 
@@ -233,7 +234,6 @@ if __name__ == "__main__":
         int x = 10;
         bool v=true;
         def abc123 = (1 + 2) * 3 + (4 * 5);
-        1+3;
     """
 
     tokens = tokenize_program(program)
