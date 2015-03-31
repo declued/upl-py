@@ -24,7 +24,7 @@ class Parser(object):
         self.tokens = tokens
 
     def parse(self):
-        return self.parse_program(tokens)
+        return self.parse_program(self.tokens)
 
     def parse_program(self, tokens):
         """
@@ -362,7 +362,7 @@ class Parser(object):
         token_to_node_type = {
             TokenType.BoolLiteral: BoolLiteralNode,
             TokenType.IntLiteral: IntLiteralNode,
-            RealLiteralNode: RealLiteralNode
+            TokenType.RealLiteral: RealLiteralNode
         }
 
         node_type = token_to_node_type.get(tokens[0].type)
