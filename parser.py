@@ -4,7 +4,8 @@ import json
 from parse_nodes import ProgramNode, DeclNode, FuncDefNode, BoolLiteralNode,\
                         IntLiteralNode, RealLiteralNode, FuncCallNode,\
                         BinaryOperationNode, UnaryOperationNode,\
-                        FuncTypeNode, BasicTypeNode, InferredTypeNode
+                        FuncTypeNode, BasicTypeNode, InferredTypeNode,\
+                        IdentifierNode
 
 operator_groups = (
     ('||', '^^', '&&'),
@@ -131,12 +132,13 @@ class Parser(object):
         On success returns an expression, otherwise returns None.
 
         expression := binary_operation | unary_operation | func_call | func_def |
-                      literal | "(" expression ")";
+                      identifier | literal | "(" expression ")";
         """
         expression = self.parse_binary_operation(tokens) or\
                      self.parse_unary_operation(tokens) or\
                      self.parse_function_call(tokens) or\
                      self.parse_function_def(tokens) or\
+                     self.parse_identifier(tokens) or\
                      self.parse_literal(tokens)
 
         if expression is None and\
@@ -337,6 +339,16 @@ class Parser(object):
 
         return basic_type
 
+    def parse_identifier(self, tokens):
+        """
+        On success returns an identifier, otherwise returns None.
+        """
+        if len(tokens) != 1 or tokens[0].type != TokenType.Identifier:
+            return None
+
+        identifier = IdentifierNode(tokens[0].value)
+        return identifier
+
     def parse_literal(self, tokens):
         """
         On success returns a literal, otherwise returns None.
@@ -388,6 +400,10 @@ class Parser(object):
 if __name__ == "__main__":
     program = """
         def a: int = 1;
+        def abs = (v: int) -> int {
+            def result = if(v > 0, v, -v);
+            result;
+        };
     """
 
     tokens = tokenize_program(program)

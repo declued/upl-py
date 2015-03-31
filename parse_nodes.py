@@ -112,6 +112,16 @@ class RealLiteralNode(LiteralNode):
             value = self.value
         )
 
+class IdentifierNode(ExpressionNode):
+    def __init__(self, name):
+        self.name = name
+
+    def to_dict(self):
+        return dict(
+            type = "IdentifierNode",
+            name = self.name
+        )
+
 class FuncCallNode(ExpressionNode):
     def __init__(self, name, args):
         self.name = name
