@@ -144,7 +144,8 @@ class Parser(object):
         if len(operator_indices) == 0:
             return None
 
-        operator_index = min(operator_indices, key=self.get_operator_priority)
+        operator_index = min(operator_indices,
+                             key=lambda i: self.get_operator_priority(tokens[i].value))
 
         # parse left operand and right operand
         operator = tokens[operator_index].value
@@ -223,6 +224,9 @@ class Parser(object):
         return arg_list
 
     def parse_function_def(self, tokens):
+        """
+        On success returns a function definition, otherwise returns None.
+        """
         return None
 
     def parse_literal(self, tokens):
@@ -264,14 +268,17 @@ class Parser(object):
         return result
 
     def get_operator_priority(self, operator):
-        return 1
+        """
+        Returns the priority of the given operator.
+        """
+        for priority, group in enumerate(operator_groups):
+            if operator in group:
+                return priority
+        return 100
 
 if __name__ == "__main__":
     program = """
-        var a = some_function(-1+5, 4, 5);
-        int x = 10;
-        bool v=true;
-        def abc123 = (1 + 2) * 3 + (4 * 5);
+        (1 + 2) * 3 + (4 * 5) + 5;
     """
 
     tokens = tokenize_program(program)
