@@ -10,9 +10,114 @@ class TestParser(unittest.TestCase):
             3.14;
             """, {
             "statements": [
-                dict(type="IntLiteralNode"),
-                dict(type="BoolLiteralNode"),
-                dict(type="RealLiteralNode"),
+                dict(type="IntLiteralNode", value=1),
+                dict(type="BoolLiteralNode", value=True),
+                dict(type="RealLiteralNode", value=3.14),
+            ]
+        })
+
+    def test_identifier_expressions(self):
+        self.checkParseTree("a; b;", {
+            "statements": [
+                dict(type="IdentifierNode", name="a"),
+                dict(type="IdentifierNode", name="b")
+            ]
+        })
+
+    def test_binary_operations(self):
+        self.checkParseTree("1 + 2 + 3; 4 * 5 + 6 * 7;", {
+            "statements": [
+                {
+                    "type": "BinaryOperationNode",
+                    "operator": "+",
+                    "left_operand": dict(type="IntLiteralNode", value=1),
+                    "right_operand": {
+                        "type": "BinaryOperationNode",
+                        "left_operand": dict(type="IntLiteralNode", value=2),
+                        "right_operand": dict(type="IntLiteralNode", value=3)
+                    }
+                },
+                {
+                    "operator": "+",
+                    "left_operand": {
+                        "type": "BinaryOperationNode",
+                        "operator": "*",
+                        "left_operand": dict(type="IntLiteralNode", value=4),
+                        "right_operand": dict(type="IntLiteralNode", value=5)
+                    },
+                    "right_operand": {
+                        "type": "BinaryOperationNode",
+                        "operator": "*",
+                        "left_operand": dict(type="IntLiteralNode", value=6),
+                        "right_operand": dict(type="IntLiteralNode", value=7)
+                    }
+                }
+            ]
+        })
+
+    def test_unary_operations(self):
+        self.checkParseTree("~(-1 + 2);", {
+            "statements": [
+                {
+                    "type": "UnaryOperationNode",
+                    "operator": "~",
+                    "operand": {
+                        "type": "BinaryOperationNode",
+                        "left_operand": {
+                            "type": "UnaryOperationNode",
+                            "operator": "-",
+                            "operand": dict(type="IntLiteralNode", value=1)
+                        },
+                        "right_operand": dict(type="IntLiteralNode", value=2)
+                    }
+                }
+            ]
+        })
+
+    def test_function_call_1(self):
+        self.checkParseTree("F()", {
+            "statements": [
+                dict(type="FuncCallNode", name="F", args=[])
+            ]
+        })
+
+    def test_function_call_2(self):
+        self.checkParseTree("F(1)", {
+            "statements": [
+                dict(type="FuncCallNode", args=[dict(type="IntLiteralNode")])
+            ]
+        })
+
+    def test_function_call_3(self):
+        self.checkParseTree("F(1,2,3,4)", {
+            "statements": [
+                {
+                    "args": [dict(type="IntLiteralNode")] * 4
+                }
+            ]
+        })
+
+    def test_function_call_4(self):
+        self.checkParseTree("F(1 * 2, G(3), -4)", {
+            "statements": [
+                {
+                    "args": [
+                        dict(type="BinaryOperationNode"),
+                        dict(type="FuncCallNode", args=[dict()]),
+                        dict(type="UnaryOperationNode")
+                    ]
+                }
+            ]
+        })
+
+    def test_function_call_5(self):
+        self.checkParseTree("F(G(H()))", {
+            "statements": [
+                {"args": [
+                    {"args": [
+                        {"args": []}
+                    ]}
+                ]}
             ]
         })
 
