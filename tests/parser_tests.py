@@ -25,17 +25,17 @@ class TestParser(unittest.TestCase):
             3.14;
             """, {
             "statements": [
-                dict(type="IntLiteralNode", value=1),
-                dict(type="BoolLiteralNode", value=True),
-                dict(type="RealLiteralNode", value=3.14),
+                {"type": "IntLiteralNode", "value": 1},
+                {"type": "BoolLiteralNode", "value": True},
+                {"type": "RealLiteralNode", "value": 3.14},
             ]
         })
 
     def test_identifier_expressions(self):
         self.checkParseTree("a; b;", {
             "statements": [
-                dict(type="IdentifierNode", name="a"),
-                dict(type="IdentifierNode", name="b")
+                {"type": "IdentifierNode", "name": "a"},
+                {"type": "IdentifierNode", "name": "b"}
             ]
         })
 
@@ -45,11 +45,11 @@ class TestParser(unittest.TestCase):
                 {
                     "type": "BinaryOperationNode",
                     "operator": "+",
-                    "left_operand": dict(type="IntLiteralNode", value=1),
+                    "left_operand": {"type": "IntLiteralNode", "value": 1},
                     "right_operand": {
                         "type": "BinaryOperationNode",
-                        "left_operand": dict(type="IntLiteralNode", value=2),
-                        "right_operand": dict(type="IntLiteralNode", value=3)
+                        "left_operand": {"type": "IntLiteralNode", "value": 2},
+                        "right_operand": {"type": "IntLiteralNode", "value": 3}
                     }
                 },
                 {
@@ -57,14 +57,14 @@ class TestParser(unittest.TestCase):
                     "left_operand": {
                         "type": "BinaryOperationNode",
                         "operator": "*",
-                        "left_operand": dict(type="IntLiteralNode", value=4),
-                        "right_operand": dict(type="IntLiteralNode", value=5)
+                        "left_operand": {"type": "IntLiteralNode", "value": 4},
+                        "right_operand": {"type": "IntLiteralNode", "value": 5}
                     },
                     "right_operand": {
                         "type": "BinaryOperationNode",
                         "operator": "*",
-                        "left_operand": dict(type="IntLiteralNode", value=6),
-                        "right_operand": dict(type="IntLiteralNode", value=7)
+                        "left_operand": {"type": "IntLiteralNode", "value": 6},
+                        "right_operand": {"type": "IntLiteralNode", "value": 7}
                     }
                 }
             ]
@@ -81,9 +81,9 @@ class TestParser(unittest.TestCase):
                         "left_operand": {
                             "type": "UnaryOperationNode",
                             "operator": "-",
-                            "operand": dict(type="IntLiteralNode", value=1)
+                            "operand": {"type": "IntLiteralNode", "value": 1}
                         },
-                        "right_operand": dict(type="IntLiteralNode", value=2)
+                        "right_operand": {"type": "IntLiteralNode", "value": 2}
                     }
                 }
             ]
@@ -92,14 +92,14 @@ class TestParser(unittest.TestCase):
     def test_function_call_1(self):
         self.checkParseTree("F()", {
             "statements": [
-                dict(type="FuncCallNode", name="F", args=[])
+                {"type": "FuncCallNode", "name": "F", "args": []}
             ]
         })
 
     def test_function_call_2(self):
         self.checkParseTree("F(1)", {
             "statements": [
-                dict(type="FuncCallNode", args=[dict(type="IntLiteralNode")])
+                {"type": "FuncCallNode", "args": [{"type": "IntLiteralNode"}]}
             ]
         })
 
@@ -107,7 +107,7 @@ class TestParser(unittest.TestCase):
         self.checkParseTree("F(1,2,3,4)", {
             "statements": [
                 {
-                    "args": [dict(type="IntLiteralNode")] * 4
+                    "args": [{"type": "IntLiteralNode"}] * 4
                 }
             ]
         })
@@ -117,9 +117,9 @@ class TestParser(unittest.TestCase):
             "statements": [
                 {
                     "args": [
-                        dict(type="BinaryOperationNode"),
-                        dict(type="FuncCallNode", args=[dict()]),
-                        dict(type="UnaryOperationNode")
+                        {"type": "BinaryOperationNode"},
+                        {"type": "FuncCallNode", "args": [{}]},
+                        {"type": "UnaryOperationNode"}
                     ]
                 }
             ]
