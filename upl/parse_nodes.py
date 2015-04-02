@@ -1,8 +1,7 @@
 from enum import Enum
 
 class ParseNode:
-    def to_dict(self):
-        return None
+    pass
 
 class ProgramNode(ParseNode):
     def __init__(self, statements):
@@ -159,4 +158,3 @@ class UnaryOperationNode(ExpressionNode):
             operator = self.operator,
             operand = self.operand.to_dict()
         )
-        return None
