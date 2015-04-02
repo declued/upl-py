@@ -1,4 +1,4 @@
-#!env python
+#!/usr/bin/env python
 
 import unittest
 from tests import TestLexer, TestParser
