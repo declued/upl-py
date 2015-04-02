@@ -7,6 +7,6 @@ install:
   - pip install coverage
   - pip install nose
 script:
-  - nosetests --with-coverage
+  - nosetests --with-coverage --cover-package=upl
 after_success:
   - coveralls
