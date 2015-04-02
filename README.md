@@ -1,5 +1,8 @@
 # UPL Compiler in Python
 
+[![Build Status](http://img.shields.io/travis/declued/upl-py/master.svg)][status]
+[![Coverage](http://img.shields.io/coveralls/declued/upl-py/master.svg)][coverage]
+
 Goals of this project are:
 
 * Implement a working compiler for the language which https://github.com/declued/upl wants to implement
@@ -16,3 +19,6 @@ def abs = (v: int) -> int {
     result;
 }
 ```
+
+[status]: https://travis-ci.org/declued/upl-py
+[coverage]: https://coveralls.io/r/declued/upl-py
