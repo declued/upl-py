@@ -76,8 +76,3 @@ def tokenize_line(line):
         line_tail = line[len(first_token.uncooked):]
         return [first_token] + tokenize_line(line_tail)
 
-
-if __name__ == "__main__":
-    for token in tokenize_program("def x = 42+8.0 * 98+a;"):
-        print token
-

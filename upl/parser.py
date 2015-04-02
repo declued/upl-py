@@ -396,19 +396,3 @@ class Parser(object):
             if operator in group:
                 return priority
         return 100
-
-if __name__ == "__main__":
-    program = """
-        def a: int = 1;
-        def abs = (v: int) -> int {
-            def result = if(v > 0, v, -v);
-            result;
-        };
-    """
-
-    tokens = tokenize_program(program)
-    parse_tree = Parser(tokens).parse()
-    if parse_tree is None:
-        print "parse error"
-    else:
-        print json.dumps(parse_tree.to_dict(), indent=2, sort_keys=True)
