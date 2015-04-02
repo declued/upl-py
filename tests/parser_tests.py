@@ -2,6 +2,21 @@ import unittest
 from upl import lexer, parser, parse_nodes
 import json
 
+INT_TYPE_NODE = {
+    "type": "BasicTypeNode",
+    "type_name": "TokenType.KeywordInt"
+}
+
+BOOL_TYPE_NODE = {
+    "type": "BasicTypeNode",
+    "type_name": "TokenType.KeywordBool"
+}
+
+REAL_TYPE_NODE = {
+    "type": "BasicTypeNode",
+    "type_name": "TokenType.KeywordReal"
+}
+
 class TestParser(unittest.TestCase):
     def test_literal_expressions(self):
         self.checkParseTree("""
@@ -118,6 +133,52 @@ class TestParser(unittest.TestCase):
                         {"args": []}
                     ]}
                 ]}
+            ]
+        })
+
+    def test_function_def_1(self):
+        self.checkParseTree("()->int{}", {
+            "statements": [
+                {
+                    "type": "FuncDefNode",
+                    "func_type": {
+                        "args": [],
+                        "return_type": INT_TYPE_NODE
+                    },
+                    "statements": []
+                }
+            ]
+        })
+
+    def test_function_def_2(self):
+        self.checkParseTree("(a: int)->int{}", {
+            "statements": [
+                {
+                    "type": "FuncDefNode",
+                    "func_type": {
+                        "args": [("a", INT_TYPE_NODE)],
+                        "return_type": INT_TYPE_NODE
+                    },
+                    "statements": []
+                }
+            ]
+        })
+
+    def test_function_def_3(self):
+        self.checkParseTree("(a: int, b:bool,c: real)->int{}", {
+            "statements": [
+                {
+                    "type": "FuncDefNode",
+                    "func_type": {
+                        "args": [
+                            ("a", INT_TYPE_NODE),
+                            ("b", BOOL_TYPE_NODE), 
+                            ("c", REAL_TYPE_NODE)
+                        ],
+                        "return_type": INT_TYPE_NODE
+                    },
+                    "statements": []
+                }
             ]
         })
 
