@@ -97,6 +97,10 @@ class TestLexer(unittest.TestCase):
         self.checkTokenValues("a_variable a123 CamelCase",
                               ["a_variable", "a123", "CamelCase"])
 
+    def test_errors(self):
+        self.checkTokenTypes("`123 440400 4",
+                             [TokenType.Error])
+
     def checkTokenTypes(self, program, expected_token_types):
         tokens = lexer.tokenize_program(program)
         self.assertEqual(len(tokens), len(expected_token_types))

@@ -17,6 +17,10 @@ REAL_TYPE_NODE = {
     "type_name": "TokenType.KeywordReal"
 }
 
+INFERRED_TYPE_NODE = {
+    "type": "InferredTypeNode"
+}
+
 class TestParser(unittest.TestCase):
     def test_literal_expressions(self):
         self.checkParseTree("""
@@ -85,6 +89,40 @@ class TestParser(unittest.TestCase):
                         },
                         "right_operand": {"type": "IntLiteralNode", "value": 2}
                     }
+                }
+            ]
+        })
+
+    def test_decl_1(self):
+        self.checkParseTree("def a = 1;", {
+            "statements": [
+                {
+                    "type": "DeclNode",
+                    "declarator": "TokenType.KeywordDef",
+                    "identifier": "a",
+                    "identifier_type": INFERRED_TYPE_NODE
+                }
+            ]
+        })
+
+    def test_decl_2(self):
+        self.checkParseTree("def a: int = 1;", {
+            "statements": [
+                {
+                    "type": "DeclNode",
+                    "declarator": "TokenType.KeywordDef",
+                    "identifier": "a",
+                    "identifier_type": INT_TYPE_NODE
+                }
+            ]
+        })
+
+    def test_decl_3(self):
+        self.checkParseTree("var a = 1;", {
+            "statements": [
+                {
+                    "type": "DeclNode",
+                    "declarator": "TokenType.KeywordVar"
                 }
             ]
         })
