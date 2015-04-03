@@ -74,6 +74,10 @@ class TestParser(unittest.TestCase):
             ]
         })
 
+    def test_binary_opertion_error(self):
+        self.checkParseFails("1 * var;")
+        self.checkParseFails("var * 1;")
+
     def test_unary_operations(self):
         self.checkParseTree("~(-1 + 2);", {
             "statements": [
@@ -92,6 +96,10 @@ class TestParser(unittest.TestCase):
                 }
             ]
         })
+
+    def test_unary_operation_error(self):
+        self.checkParseFails("-var;")
+        self.checkParseFails("--;")
 
     def test_decl_1(self):
         self.checkParseTree("def a = 1;", {
@@ -138,6 +146,12 @@ class TestParser(unittest.TestCase):
 
     def test_decl_error_4(self):
         self.checkParseFails("var;")
+
+    def test_decl_error_5(self):
+        self.checkParseFails("var 123 = 12;")
+
+    def test_decl_error_6(self):
+        self.checkParseFails("var a == 123;")
 
     def test_function_call_1(self):
         self.checkParseTree("F()", {

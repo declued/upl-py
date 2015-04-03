@@ -142,6 +142,7 @@ class Parser(object):
                      self.parse_literal(tokens)
 
         if expression is None and\
+           len(tokens) >= 2 and\
            tokens[0].type == TokenType.OpenParen and\
            tokens[-1].type == TokenType.CloseParen:
            expression = self.parse_expression(tokens[1:-1])
