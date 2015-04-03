@@ -1,5 +1,5 @@
 import re
-from token import TokenType, Token
+from upl.token import TokenType, Token
 
 DEFAULT_VALUE_FUNC = lambda v: None
 

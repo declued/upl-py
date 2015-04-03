@@ -1,11 +1,11 @@
-from token import TokenType, Token
-from lexer import tokenize_program
+from upl.token import TokenType, Token
+from upl.lexer import tokenize_program
 import json
-from parse_nodes import ProgramNode, DeclNode, FuncDefNode, BoolLiteralNode,\
-                        IntLiteralNode, RealLiteralNode, FuncCallNode,\
-                        BinaryOperationNode, UnaryOperationNode,\
-                        FuncTypeNode, BasicTypeNode, InferredTypeNode,\
-                        IdentifierNode
+from upl.parse_nodes import ProgramNode, DeclNode, FuncDefNode, BoolLiteralNode,\
+                            IntLiteralNode, RealLiteralNode, FuncCallNode,\
+                            BinaryOperationNode, UnaryOperationNode,\
+                            FuncTypeNode, BasicTypeNode, InferredTypeNode,\
+                            IdentifierNode
 
 operator_groups = (
     ('||', '^^', '&&'),
