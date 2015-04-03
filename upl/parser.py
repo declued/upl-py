@@ -15,8 +15,7 @@ operator_groups = (
     ('<<', '>>', '<<>', '>><'),
     ('+', '-'),
     ('*', '/', '%'),
-    ('**'),
-    ('!', '~')
+    ('**')
 )
 
 class Parser(object):
@@ -273,6 +272,9 @@ class Parser(object):
 
         arg_list = self.parse_function_def_args(tokens[1:idxs[0]-1])
         return_type = self.parse_basic_type(tokens[idxs[0]+1:])
+
+        if arg_list is None or return_type is None:
+            return None
 
         function_type = FuncTypeNode(arg_list, return_type)
 

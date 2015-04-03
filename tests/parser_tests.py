@@ -78,6 +78,21 @@ class TestParser(unittest.TestCase):
         self.checkParseFails("1 * var;")
         self.checkParseFails("var * 1;")
 
+    def test_binary_operator_priorities_1(self):
+        self.checkParseTree("a @> b ** c @> d", {
+            "statements": [
+                {
+                    "operator": "**",
+                    "left_operand": {
+                        "operator": "@>"
+                    },
+                    "right_operand": {
+                        "operator": "@>"
+                    }
+                }
+            ]
+        })
+
     def test_unary_operations(self):
         self.checkParseTree("~(-1 + 2);", {
             "statements": [
@@ -189,6 +204,15 @@ class TestParser(unittest.TestCase):
             ]
         })
 
+    def test_function_call_error_1(self):
+        self.checkParseFails("F(,)")
+
+    def test_function_call_error_2(self):
+        self.checkParseFails("F(-)")
+
+    def test_function_call_error_3(self):
+        self.checkParseFails("F(()")
+
     def test_function_call_5(self):
         self.checkParseTree("F(G(H()))", {
             "statements": [
@@ -245,6 +269,15 @@ class TestParser(unittest.TestCase):
                 }
             ]
         })
+
+    def test_function_def_error_1(self):
+        self.checkParseFails("()->123{}")
+
+    def test_function_def_error_2(self):
+        self.checkParseFails("(a: 123)->int{}")
+
+    def test_function_def_error_3(self):
+        self.checkParseFails("(123)->int{}")
 
     def checkParseFails(self, program):
         tokens = lexer.tokenize_program(program)
