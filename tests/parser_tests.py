@@ -421,6 +421,9 @@ class TestParser(unittest.TestCase):
     def test_function_def_error_3(self):
         self.checkParseFails("(123)->int{}")
 
+    def test_function_def_error_4(self):
+        self.checkParseFails("()->int { +; }")
+
     def checkParseFails(self, program):
         tokens = lexer.tokenize_program(program)
         parse_tree = parser.Parser(tokens).parse()
