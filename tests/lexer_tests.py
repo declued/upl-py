@@ -1,6 +1,6 @@
 import unittest
 from upl import lexer
-from upl.token import TokenType
+from upl.token import Token, TokenType
 
 class TestLexer(unittest.TestCase):
     def test_simple_definition(self):
@@ -100,6 +100,13 @@ class TestLexer(unittest.TestCase):
     def test_errors(self):
         self.checkTokenTypes("`123 440400 4",
                              [TokenType.Error])
+
+    def test_token_to_str(self):
+        token1 = Token(type=TokenType.Operator, value="**")
+        token2 = Token(type=TokenType.KeywordInt)
+        self.assertIn("**", str(token1))
+        self.assertIn(str(TokenType.Operator), str(token1))
+        self.assertIn(str(TokenType.KeywordInt), str(token2))
 
     def checkTokenTypes(self, program, expected_token_types):
         tokens = lexer.tokenize_program(program)

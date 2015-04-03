@@ -127,6 +127,18 @@ class TestParser(unittest.TestCase):
             ]
         })
 
+    def test_decl_error_1(self):
+        self.checkParseFails("var a;")
+
+    def test_decl_error_2(self):
+        self.checkParseFails("var a: 12 = 1;")
+
+    def test_decl_error_3(self):
+        self.checkParseFails("var a: int = {}")
+
+    def test_decl_error_4(self):
+        self.checkParseFails("var;")
+
     def test_function_call_1(self):
         self.checkParseTree("F()", {
             "statements": [
@@ -219,6 +231,11 @@ class TestParser(unittest.TestCase):
                 }
             ]
         })
+
+    def checkParseFails(self, program):
+        tokens = lexer.tokenize_program(program)
+        parse_tree = parser.Parser(tokens).parse()
+        self.assertIsNone(parse_tree)
 
     def checkParseTree(self, program, partial_parse_tree):
         tokens = lexer.tokenize_program(program)
