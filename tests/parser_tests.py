@@ -93,6 +93,25 @@ class TestParser(unittest.TestCase):
             ]
         })
 
+    def test_binary_operator_priorities_2(self):
+        for g1, g2 in zip(parser.operator_groups, parser.operator_groups[1:]):
+            for op1 in g1:
+                for op2 in g2:
+                    self.checkParseTree(
+                        "a {op2} b {op1} c {op2} d".format(op1=op1, op2=op2), {
+                            "statements": [
+                                {
+                                    "operator": op1,
+                                    "left_operand": {
+                                        "operator": op2
+                                    },
+                                    "right_operand": {
+                                        "operator": op2
+                                    }
+                                }
+                            ]
+                        })
+
     def test_unary_operations(self):
         self.checkParseTree("~(-1 + 2);", {
             "statements": [
@@ -204,15 +223,6 @@ class TestParser(unittest.TestCase):
             ]
         })
 
-    def test_function_call_error_1(self):
-        self.checkParseFails("F(,)")
-
-    def test_function_call_error_2(self):
-        self.checkParseFails("F(-)")
-
-    def test_function_call_error_3(self):
-        self.checkParseFails("F(()")
-
     def test_function_call_5(self):
         self.checkParseTree("F(G(H()))", {
             "statements": [
@@ -223,6 +233,15 @@ class TestParser(unittest.TestCase):
                 ]}
             ]
         })
+
+    def test_function_call_error_1(self):
+        self.checkParseFails("F(,)")
+
+    def test_function_call_error_2(self):
+        self.checkParseFails("F(-)")
+
+    def test_function_call_error_3(self):
+        self.checkParseFails("F(()")
 
     def test_function_def_1(self):
         self.checkParseTree("()->int{}", {
