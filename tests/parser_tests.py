@@ -135,6 +135,44 @@ class TestParser(unittest.TestCase):
         self.checkParseFails("-var;")
         self.checkParseFails("--;")
 
+    def test_nested_expressions(self):
+        self.checkParseTree("-(1**(1||a))*(true+((f(a))))", {
+            "statements": [
+                {
+                    "type": "BinaryOperationNode",
+                    "operator": "*",
+                    "left_operand": {
+                        "type": "UnaryOperationNode",
+                        "operator": "-",
+                        "operand": {
+                            "type": "BinaryOperationNode",
+                            "operator": "**",
+                            "left_operand": {"type": "IntLiteralNode"},
+                            "right_operand": {
+                                "type": "BinaryOperationNode",
+                                "operator": "||",
+                                "left_operand": {"type": "IntLiteralNode"},
+                                "right_operand": {"type": "IdentifierNode"}
+                            }
+                        }
+
+                    },
+                    "right_operand": {
+                        "type": "BinaryOperationNode",
+                        "operator": "+",
+                        "left_operand": {"type": "BoolLiteralNode"},
+                        "right_operand": {
+                            "type": "FuncCallNode",
+                            "args": [
+                                {"type": "IdentifierNode", "name": "a"}
+                            ]
+                        }
+                    }
+
+                }
+            ]
+        })
+
     def test_decl_1(self):
         self.checkParseTree("def a = 1;", {
             "statements": [
@@ -285,6 +323,91 @@ class TestParser(unittest.TestCase):
                         "return_type": INT_TYPE_NODE
                     },
                     "statements": []
+                }
+            ]
+        })
+
+    def test_function_def_4(self):
+        self.checkParseTree("""
+            (a: int, b:bool,c: real)->int{
+                def a = 1 * 3 + 4;
+                var b = 3 + a;
+                c;
+            }
+        """, {
+            "statements": [
+                {
+                    "type": "FuncDefNode",
+                    "func_type": {
+                        "args": [
+                            ("a", INT_TYPE_NODE),
+                            ("b", BOOL_TYPE_NODE), 
+                            ("c", REAL_TYPE_NODE)
+                        ],
+                        "return_type": INT_TYPE_NODE
+                    },
+                    "statements": [
+                        {"type": "DeclNode", "declarator": "TokenType.KeywordDef"},
+                        {"type": "DeclNode", "declarator": "TokenType.KeywordVar"},
+                        {"type": "IdentifierNode"}
+                    ]
+                }
+            ]
+        })
+
+    def test_function_def_nested_1(self):
+        self.checkParseTree("""
+            var x = () -> int {
+                def a = 1 * 3 + 4;
+                var f = (c: int, d: bool) -> int {
+                    c + d;
+                };
+                f(a);
+            };
+            x(1);
+        """, {
+            "statements": [
+                {
+                    "type": "DeclNode",
+                    "expression": {
+                        "type": "FuncDefNode",
+                        "statements": [
+                            {"type": "DeclNode"},
+                            {
+                                "type": "DeclNode",
+                                "expression": {
+                                    "type": "FuncDefNode",
+                                    "func_type": {
+                                        "args": [
+                                            ("c", INT_TYPE_NODE),
+                                            ("d", BOOL_TYPE_NODE)
+                                        ],
+                                        "return_type": INT_TYPE_NODE
+                                    },
+                                    "statements": [
+                                        {"type": "BinaryOperationNode"}
+                                    ]
+                                }
+                            },
+                            {"type": "FuncCallNode"}
+                        ]
+                    }
+                },
+                {"type": "FuncCallNode"}
+            ]
+        })
+    
+    def test_function_def_nested_2(self):
+        self.checkParseTree("()->int{()->int{}}", {
+            "statements": [
+                {
+                    "type": "FuncDefNode",
+                    "statements": [
+                        {
+                            "type": "FuncDefNode",
+                            "statements": []
+                        }
+                    ]
                 }
             ]
         })
