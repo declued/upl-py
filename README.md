@@ -1,14 +1,43 @@
-# UPL Compiler in Python
+# UPL Compiler
 
 [![Build Status](http://img.shields.io/travis/declued/upl-py/master.svg)][status]
 [![Coverage](http://img.shields.io/coveralls/declued/upl-py/master.svg)][coverage]
 
-Goals of this project are:
+UPL is a simple, embeddable, strongly typed, functional programming language. Our main goal for creating it was to learn more about compilers and programming languages, while creating something useful.
 
-* Implement a working compiler for the language which https://github.com/declued/upl wants to implement
-* Make the simplest possible decisions
-* Avoid over-optimization
-* Avoid over-engineering
+## Basic Grammar
+
+### Types
+
+UPL provides three basic types:
+* bool
+* int
+* real
+
+UPL currently doesn't support strings, lists, dictionaries, etc. 
+
+### Declarations
+
+* To declare an immutable name, you can use the ```def``` keyword. Attempting to modify the value
+  of a immutable name will result in a compile error.
+
+    ```
+def a = 1;
+    ```
+
+* To declare a mutable name, you can use the ```var``` keyword.
+
+    ```
+var a = 1;
+    ```
+
+* You can specify the type of a name when declaring it using the ```[var|def] name: type``` syntax.
+
+    ```
+var a: int = 1;
+    ```
+    
+* If the type of a name is not specified, it will be inferred from the expression on the right hand side.
 
 ## Examples
 
