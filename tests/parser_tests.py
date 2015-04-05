@@ -424,6 +424,11 @@ class TestParser(unittest.TestCase):
     def test_function_def_error_4(self):
         self.checkParseFails("()->int { +; }")
 
+    def test_empty_statements(self):
+        self.checkParseTree(";;;1;", {
+            "statements": [{"type": "IntLiteralNode"}]
+        })
+
     def checkParseFails(self, program):
         tokens = lexer.tokenize_program(program)
         parse_tree = parser.Parser(tokens).parse()
