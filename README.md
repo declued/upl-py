@@ -105,6 +105,10 @@ Other operators
 * Return value of a function is the result of evaluation of its last statement.
 * Functions can be nested.
 
+### Comments 
+* Comments start with the ```#``` character.
+* Everything in a line after the first occurrence of ```#``` is ignored and not parsed.
+
 ## Examples
 
 ### Calculating absolute value of an integer
