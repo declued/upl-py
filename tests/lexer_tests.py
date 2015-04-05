@@ -101,6 +101,12 @@ class TestLexer(unittest.TestCase):
         self.checkTokenTypes("`123 440400 4",
                              [TokenType.Error])
 
+    def test_location_info(self):
+        tokens = lexer.tokenize_program("1  2\n3 4 #comment\n\n  5;")
+        locations = [t.location for t in tokens]
+        self.assertEqual(locations, [(1, 1), (1, 4), (2, 1), (2, 3),
+                                     (4, 3), (4, 4)])
+
     def test_token_to_str(self):
         token1 = Token(type=TokenType.Operator, value="**")
         token2 = Token(type=TokenType.KeywordInt)

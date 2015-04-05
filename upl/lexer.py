@@ -34,14 +34,16 @@ def tokenize_program(program):
     a list.
     """
     result = []
+    row = 0
 
     for line in program.split("\n"):
-        result += tokenize_line(line)
+        row += 1
+        result += tokenize_line(line, row, 1)
 
     return result
 
 
-def tokenize_line(line):
+def tokenize_line(line, row, col):
     """
     tokenize splits the give line into tokens and returns the result as
     a list.
@@ -51,7 +53,7 @@ def tokenize_line(line):
 
     # skip spaces
     if line[0].isspace():
-        return tokenize_line(line[1:])
+        return tokenize_line(line[1:], row, col + 1)
 
     # check for comments
     if line[0] == '#':
@@ -68,11 +70,12 @@ def tokenize_line(line):
                len(first_token.uncooked) < len(uncooked):
                 first_token = Token(type = token_type,
                                     value = value_func(uncooked),
-                                    uncooked = uncooked)
+                                    uncooked = uncooked,
+                                    location = (row, col))
 
     if first_token is None:
-        return [Token(TokenType.Error)]
+        return [Token(TokenType.Error, location = (row, col))]
     else:
-        line_tail = line[len(first_token.uncooked):]
-        return [first_token] + tokenize_line(line_tail)
-
+        token_len = len(first_token.uncooked)
+        line_tail = line[token_len:]
+        return [first_token] + tokenize_line(line_tail, row, col + token_len)

@@ -26,10 +26,11 @@ class TokenType(Enum):
 
 
 class Token:
-    def __init__(self, type, value=None, uncooked=None):
+    def __init__(self, type, value=None, uncooked=None, location=None):
         self.type = type
         self.value = value
         self.uncooked = uncooked
+        self.location = location
 
     def __str__(self):
         if self.value:
