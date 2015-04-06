@@ -24,6 +24,7 @@ token_lex_info_list = (
     (TokenType.KeywordBool, r"bool", DEFAULT_VALUE_FUNC),
     (TokenType.KeywordInt, r"int", DEFAULT_VALUE_FUNC),
     (TokenType.KeywordReal, r"real", DEFAULT_VALUE_FUNC),
+    (TokenType.KeywordPackage, r"package", DEFAULT_VALUE_FUNC),
     (TokenType.Identifier, r"[A-Za-z][A-Za-z0-9_]*", lambda v: v),
 )
 

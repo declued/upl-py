@@ -84,10 +84,12 @@ class TestLexer(unittest.TestCase):
                               ["||", "<", "<>", "+", "~", "**", "@>"])
 
     def test_keywords(self):
-        self.checkTokenTypes("def var bool int real defx varx boolx intx realx",
+        self.checkTokenTypes("def var bool int real package " +\
+                             "defx varx boolx intx realx packagex",
                              [TokenType.KeywordDef, TokenType.KeywordVar,
                               TokenType.KeywordBool, TokenType.KeywordInt,
-                              TokenType.KeywordReal] + [TokenType.Identifier] * 5)
+                              TokenType.KeywordReal, TokenType.KeywordPackage] +\
+                             [TokenType.Identifier] * 6)
 
     def test_identifiers(self):
         self.checkTokenTypes("a_variable a123 A123 a__ aaa CamelCase",

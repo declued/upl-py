@@ -47,7 +47,7 @@ class Parser(object):
         while len(tokens) > 0:
             statement_tokens = self.get_first_statement(tokens)
             if len(statement_tokens) == 0:
-                # skip the statement separator and contine with the rest
+                # skip the statement separator and continue with the rest
                 tokens = tokens[1:]
                 continue
 
