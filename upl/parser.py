@@ -5,7 +5,7 @@ from upl.parse_nodes import ProgramNode, DeclNode, FuncDefNode, BoolLiteralNode,
                             IntLiteralNode, RealLiteralNode, FuncCallNode,\
                             BinaryOperationNode, UnaryOperationNode,\
                             FuncTypeNode, BasicTypeNode, InferredTypeNode,\
-                            IdentifierNode
+                            IdentifierNode, FuncArgNode
 
 operator_groups = (
     ('||', '^^', '&&'),
@@ -328,7 +328,7 @@ class Parser(object):
             return None
 
         identifier = tokens[0].value
-        typed_var = (identifier, type)
+        typed_var = FuncArgNode(identifier, type)
 
         return typed_var
 

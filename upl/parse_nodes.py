@@ -75,8 +75,13 @@ class FuncTypeNode(TypeNode):
         return dict(
             type = "FuncTypeNode",
             return_type = self.return_type.to_dict(),
-            args = [(name, type.to_dict()) for name, type in self.arg_list]
+            args = [(a.name, a.type.to_dict()) for a in self.arg_list]
         )
+
+class FuncArgNode(ParseNode):
+    def __init__(self, name, type):
+        self.name = name
+        self.type = type
 
 class LiteralNode(ExpressionNode):
     pass
