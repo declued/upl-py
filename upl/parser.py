@@ -4,7 +4,7 @@ import json
 from upl.parse_nodes import ProgramNode, DeclNode, FuncDefNode, BoolLiteralNode,\
                             IntLiteralNode, RealLiteralNode, FuncCallNode,\
                             BinaryOperationNode, UnaryOperationNode,\
-                            FuncTypeNode, IdentifierNode, FuncArgNode
+                            IdentifierNode, FuncArgNode
 
 operator_groups = (
     ('||', '^^', '&&'),
@@ -241,17 +241,19 @@ class Parser(object):
         if len(idxs) != 1 or tokens[-1].type != TokenType.CloseBracket:
             return None
 
-        function_type = self.parse_function_type(tokens[:idxs[0]])
+        arg_list, return_type = self.parse_function_header(tokens[:idxs[0]])
         function_body = self.parse_statement_list(tokens[idxs[0] + 1:-1])
 
-        if function_type is None or function_body is None:
+        if arg_list is None or\
+           return_type is None or\
+           function_body is None:
             return None
 
-        function_def = FuncDefNode(function_type, function_body)
+        function_def = FuncDefNode(arg_list, return_type, function_body)
 
         return function_def
 
-    def parse_function_type(self, tokens):
+    def parse_function_header(self, tokens):
         """
         On success returns a function type, otherwise returns None.
 
@@ -264,17 +266,15 @@ class Parser(object):
            tokens[idxs[0] + 1].type not in (TokenType.KeywordBool,
                                             TokenType.KeywordInt,
                                             TokenType.KeywordReal):
-           return None
+           return None, None
 
         arg_list = self.parse_function_def_args(tokens[1:idxs[0]-1])
         return_type = tokens[idxs[0]+1]
 
         if arg_list is None or return_type is None:
-            return None
+            return None, None
 
-        function_type = FuncTypeNode(arg_list, return_type)
-
-        return function_type
+        return arg_list, return_type
 
     def parse_function_def_args(self, tokens):
         """

@@ -258,10 +258,8 @@ class TestParser(unittest.TestCase):
             "statements": [
                 {
                     "type": "FuncDefNode",
-                    "func_type": {
-                        "args": [],
-                        "return_type": INT_TYPE_NODE
-                    },
+                    "args": [],
+                    "return_type": INT_TYPE_NODE,
                     "statements": []
                 }
             ]
@@ -272,10 +270,8 @@ class TestParser(unittest.TestCase):
             "statements": [
                 {
                     "type": "FuncDefNode",
-                    "func_type": {
-                        "args": [("a", INT_TYPE_NODE)],
-                        "return_type": INT_TYPE_NODE
-                    },
+                    "args": [("a", INT_TYPE_NODE)],
+                    "return_type": INT_TYPE_NODE,
                     "statements": []
                 }
             ]
@@ -286,14 +282,12 @@ class TestParser(unittest.TestCase):
             "statements": [
                 {
                     "type": "FuncDefNode",
-                    "func_type": {
-                        "args": [
-                            ("a", INT_TYPE_NODE),
-                            ("b", BOOL_TYPE_NODE), 
-                            ("c", REAL_TYPE_NODE)
-                        ],
-                        "return_type": INT_TYPE_NODE
-                    },
+                    "args": [
+                        ("a", INT_TYPE_NODE),
+                        ("b", BOOL_TYPE_NODE), 
+                        ("c", REAL_TYPE_NODE)
+                    ],
+                    "return_type": INT_TYPE_NODE,
                     "statements": []
                 }
             ]
@@ -310,14 +304,12 @@ class TestParser(unittest.TestCase):
             "statements": [
                 {
                     "type": "FuncDefNode",
-                    "func_type": {
-                        "args": [
-                            ("a", INT_TYPE_NODE),
-                            ("b", BOOL_TYPE_NODE), 
-                            ("c", REAL_TYPE_NODE)
-                        ],
-                        "return_type": INT_TYPE_NODE
-                    },
+                    "args": [
+                        ("a", INT_TYPE_NODE),
+                        ("b", BOOL_TYPE_NODE), 
+                        ("c", REAL_TYPE_NODE)
+                    ],
+                    "return_type": INT_TYPE_NODE,
                     "statements": [
                         {"type": "DeclNode", "declarator": "TokenType.KeywordDef"},
                         {"type": "DeclNode", "declarator": "TokenType.KeywordVar"},
@@ -349,13 +341,11 @@ class TestParser(unittest.TestCase):
                                 "type": "DeclNode",
                                 "expression": {
                                     "type": "FuncDefNode",
-                                    "func_type": {
-                                        "args": [
-                                            ("c", INT_TYPE_NODE),
-                                            ("d", BOOL_TYPE_NODE)
-                                        ],
-                                        "return_type": INT_TYPE_NODE
-                                    },
+                                    "args": [
+                                        ("c", INT_TYPE_NODE),
+                                        ("d", BOOL_TYPE_NODE)
+                                    ],
+                                    "return_type": INT_TYPE_NODE,
                                     "statements": [
                                         {"type": "BinaryOperationNode"}
                                     ]
