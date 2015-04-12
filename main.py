@@ -2,6 +2,7 @@ from upl import lexer, parser, analyzer
 
 if __name__ == "__main__":
     program = """
+    def a = 3;
     def fib = (n: int) -> int {
         def result = if(n <= 1, 1, fib(n - 1) + fib(n - 2));
         result;
