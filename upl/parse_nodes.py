@@ -56,10 +56,11 @@ class FuncDefNode(ExpressionNode):
         )
 
 class FuncArgNode(ParseNode):
-    def __init__(self, name, type):
+    def __init__(self, name, type, index):
         super(FuncArgNode, self).__init__()
         self.name = name
         self.type = type
+        self.index = index
 
 class LiteralNode(ExpressionNode):
     pass

@@ -291,10 +291,10 @@ class Parser(object):
 
         start = 0
         arg_list = []
-        for separator_index in separator_indices:
+        for arg_index, separator_index in enumerate(separator_indices):
             arg_tokens = tokens[start: separator_index]
             
-            arg = self.parse_typed_var(arg_tokens)
+            arg = self.parse_function_def_arg(arg_tokens, arg_index)
             if arg is None:
                 return None
 
@@ -303,11 +303,11 @@ class Parser(object):
 
         return arg_list
 
-    def parse_typed_var(self, tokens):
+    def parse_function_def_arg(self, tokens, index):
         """
-        On success returns a identifier/type pair, otherwise returns None.
+        On success returns a FuncArgNode, otherwise returns None.
 
-        typed_var := identifier ":" type;
+        function_def_arg := identifier ":" type;
         """
         if len(tokens) != 3 or\
            tokens[0].type != TokenType.Identifier or\
@@ -319,7 +319,7 @@ class Parser(object):
 
         type = tokens[2].type
         identifier = tokens[0].value
-        typed_var = FuncArgNode(identifier, type)
+        typed_var = FuncArgNode(identifier, type, index)
 
         return typed_var
 

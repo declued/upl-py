@@ -89,8 +89,8 @@ class Analyzer(object):
             func_def = node.expression
             for s in func_def.statements:
                 names.update(self.get_names_statement(s, ns + (node.identifier,)))
-            for idx, arg in enumerate(func_def.type.arg_list):
-                names[ns + (node.identifier, arg.name)] = ContextVarNode(idx)
+            for arg in func_def.type.arg_list:
+                names[ns + (node.identifier, arg.name)] = arg
 
         return names
 
