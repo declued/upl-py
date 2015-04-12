@@ -12,6 +12,16 @@ class BasicType(Enum):
     Int         = 1
     Real        = 2
 
+class AnalyzeNode(object):
+    pass
+
+class ConstantNode(AnalyzeNode):
+    def __init__(self, index):
+        self.index = index
+
+class ContextVarNode(AnalyzeNode):
+    def __init__(self, index):
+        self.index = index
 
 class Analyzer(object):
     def __init__(self, parse_tree):
@@ -21,6 +31,7 @@ class Analyzer(object):
         constants = self.get_consts_program(self.parse_tree)
         constants = list(set(constants))
         names = self.get_names_program(self.parse_tree, ())
+
         return constants, names
 
     def get_consts_program(self, node):
@@ -75,7 +86,11 @@ class Analyzer(object):
         names = {ns + (node.identifier, ): node}
 
         if isinstance(node.expression, FuncDefNode):
-            for s in node.expression.statements:
+            func_def = node.expression
+            for s in func_def.statements:
                 names.update(self.get_names_statement(s, ns + (node.identifier,)))
+            for idx, arg in enumerate(func_def.type.arg_list):
+                names[ns + (node.identifier, arg.name)] = ContextVarNode(idx)
 
         return names
+

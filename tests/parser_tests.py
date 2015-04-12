@@ -2,24 +2,9 @@ import unittest
 from upl import lexer, parser, parse_nodes
 import json
 
-INT_TYPE_NODE = {
-    "type": "BasicTypeNode",
-    "type_name": "TokenType.KeywordInt"
-}
-
-BOOL_TYPE_NODE = {
-    "type": "BasicTypeNode",
-    "type_name": "TokenType.KeywordBool"
-}
-
-REAL_TYPE_NODE = {
-    "type": "BasicTypeNode",
-    "type_name": "TokenType.KeywordReal"
-}
-
-INFERRED_TYPE_NODE = {
-    "type": "InferredTypeNode"
-}
+INT_TYPE_NODE = "TokenType.KeywordInt"
+BOOL_TYPE_NODE = "TokenType.KeywordBool"
+REAL_TYPE_NODE = "TokenType.KeywordReal"
 
 class TestParser(unittest.TestCase):
     def test_literal_expressions(self):
@@ -180,24 +165,11 @@ class TestParser(unittest.TestCase):
                     "type": "DeclNode",
                     "declarator": "TokenType.KeywordDef",
                     "identifier": "a",
-                    "identifier_type": INFERRED_TYPE_NODE
                 }
             ]
         })
 
     def test_decl_2(self):
-        self.checkParseTree("def a: int = 1;", {
-            "statements": [
-                {
-                    "type": "DeclNode",
-                    "declarator": "TokenType.KeywordDef",
-                    "identifier": "a",
-                    "identifier_type": INT_TYPE_NODE
-                }
-            ]
-        })
-
-    def test_decl_3(self):
         self.checkParseTree("var a = 1;", {
             "statements": [
                 {

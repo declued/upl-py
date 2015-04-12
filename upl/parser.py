@@ -4,8 +4,7 @@ import json
 from upl.parse_nodes import ProgramNode, DeclNode, FuncDefNode, BoolLiteralNode,\
                             IntLiteralNode, RealLiteralNode, FuncCallNode,\
                             BinaryOperationNode, UnaryOperationNode,\
-                            FuncTypeNode, BasicTypeNode, InferredTypeNode,\
-                            IdentifierNode, FuncArgNode
+                            FuncTypeNode, IdentifierNode, FuncArgNode
 
 operator_groups = (
     ('||', '^^', '&&'),
@@ -77,9 +76,8 @@ class Parser(object):
         On success returns a declaration and increments the token_index, otherwise
         returns None.
 
-        declaration := declarator identifier [":" typename] "=" expression;
+        declaration := declarator identifier "=" expression;
         declarator := "def" | "var";
-        typename := "bool" | "int" | "real";
         """
         if len(tokens) < 4:
             return None
@@ -97,25 +95,15 @@ class Parser(object):
             identifier = tokens[1].value
 
         # match the assignment sign
-        idxs = self.find_delimiters(tokens, TokenType.Assignment)
-        if len(idxs) == 0:
-            return None
-
-        # match the type
-        if tokens[2].type == TokenType.TypeSep:
-            type = self.parse_basic_type(tokens[3:idxs[0]])
-        else:
-            type = InferredTypeNode()
-
-        if type is None:
+        if tokens[2].type != TokenType.Assignment:
             return None
 
         # match the expression
-        expression = self.parse_expression(tokens[idxs[0] + 1:])
+        expression = self.parse_expression(tokens[3:])
         if expression is None:
             return None
 
-        declaration = DeclNode(declarator, identifier, type, expression)
+        declaration = DeclNode(declarator, identifier, expression)
         return declaration
 
     def get_first_statement(self, tokens):
@@ -272,11 +260,14 @@ class Parser(object):
         idxs = self.find_delimiters(tokens, TokenType.ReturnsSep)
         if len(idxs) != 1 or idxs[0] < 2 or\
            tokens[0].type != TokenType.OpenParen or\
-           tokens[idxs[0] - 1].type != TokenType.CloseParen:
+           tokens[idxs[0] - 1].type != TokenType.CloseParen or\
+           tokens[idxs[0] + 1].type not in (TokenType.KeywordBool,
+                                            TokenType.KeywordInt,
+                                            TokenType.KeywordReal):
            return None
 
         arg_list = self.parse_function_def_args(tokens[1:idxs[0]-1])
-        return_type = self.parse_basic_type(tokens[idxs[0]+1:])
+        return_type = tokens[idxs[0]+1]
 
         if arg_list is None or return_type is None:
             return None
@@ -318,34 +309,19 @@ class Parser(object):
 
         typed_var := identifier ":" type;
         """
-        if len(tokens) < 3 or\
+        if len(tokens) != 3 or\
            tokens[0].type != TokenType.Identifier or\
-           tokens[1].type != TokenType.TypeSep:
+           tokens[1].type != TokenType.TypeSep or\
+           tokens[2].type not in (TokenType.KeywordBool,
+                                  TokenType.KeywordInt,
+                                  TokenType.KeywordReal):
            return None
 
-        type = self.parse_basic_type(tokens[2:])
-        if type is None:
-            return None
-
+        type = tokens[2].type
         identifier = tokens[0].value
         typed_var = FuncArgNode(identifier, type)
 
         return typed_var
-
-    def parse_basic_type(self, tokens):
-        """
-        On success returns a basic type, otherwise returns None.
-
-        basic_type := "bool" | "int" | "real";
-        """
-        if len(tokens) != 1 or\
-           tokens[0].type not in (TokenType.KeywordBool, TokenType.KeywordInt,
-                                  TokenType.KeywordReal):
-            return None
-        
-        basic_type = BasicTypeNode(tokens[0].type)
-
-        return basic_type
 
     def parse_identifier(self, tokens):
         """
