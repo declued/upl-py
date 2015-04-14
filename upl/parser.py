@@ -76,14 +76,13 @@ class Parser(object):
         On success returns a declaration and increments the token_index, otherwise
         returns None.
 
-        declaration := declarator identifier "=" expression;
-        declarator := "def" | "var";
+        declaration := "def" identifier "=" expression;
         """
         if len(tokens) < 4:
             return None
 
         # match the declarator
-        if tokens[0].type not in (TokenType.KeywordDef, TokenType.KeywordVar):
+        if tokens[0].type != TokenType.KeywordDef:
             return None
         else:
             declarator = tokens[0].type

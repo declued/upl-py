@@ -60,8 +60,8 @@ class TestParser(unittest.TestCase):
         })
 
     def test_binary_opertion_error(self):
-        self.checkParseFails("1 * var;")
-        self.checkParseFails("var * 1;")
+        self.checkParseFails("1 * def;")
+        self.checkParseFails("def * 1;")
 
     def test_binary_operator_priorities_1(self):
         self.checkParseTree("a @> b ** c @> d", {
@@ -117,7 +117,7 @@ class TestParser(unittest.TestCase):
         })
 
     def test_unary_operation_error(self):
-        self.checkParseFails("-var;")
+        self.checkParseFails("-def;")
         self.checkParseFails("--;")
 
     def test_nested_expressions(self):
@@ -169,16 +169,6 @@ class TestParser(unittest.TestCase):
             ]
         })
 
-    def test_decl_2(self):
-        self.checkParseTree("var a = 1;", {
-            "statements": [
-                {
-                    "type": "DeclNode",
-                    "declarator": "TokenType.KeywordVar"
-                }
-            ]
-        })
-
     def test_decl_error_1(self):
         self.checkParseFails("var a;")
 
@@ -189,7 +179,7 @@ class TestParser(unittest.TestCase):
         self.checkParseFails("var a: int = {}")
 
     def test_decl_error_4(self):
-        self.checkParseFails("var;")
+        self.checkParseFails("def;")
 
     def test_decl_error_5(self):
         self.checkParseFails("var 123 = 12;")
@@ -297,7 +287,7 @@ class TestParser(unittest.TestCase):
         self.checkParseTree("""
             (a: int, b:bool,c: real)->int{
                 def a = 1 * 3 + 4;
-                var b = 3 + a;
+                def b = 3 + a;
                 c;
             }
         """, {
@@ -312,7 +302,7 @@ class TestParser(unittest.TestCase):
                     "return_type": INT_TYPE_NODE,
                     "statements": [
                         {"type": "DeclNode", "declarator": "TokenType.KeywordDef"},
-                        {"type": "DeclNode", "declarator": "TokenType.KeywordVar"},
+                        {"type": "DeclNode", "declarator": "TokenType.KeywordDef"},
                         {"type": "IdentifierNode"}
                     ]
                 }
@@ -321,9 +311,9 @@ class TestParser(unittest.TestCase):
 
     def test_function_def_nested_1(self):
         self.checkParseTree("""
-            var x = () -> int {
+            def x = () -> int {
                 def a = 1 * 3 + 4;
-                var f = (c: int, d: bool) -> int {
+                def f = (c: int, d: bool) -> int {
                     c + d;
                 };
                 f(a);

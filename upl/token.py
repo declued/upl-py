@@ -18,12 +18,10 @@ class TokenType(Enum):
     ReturnsSep      = 13
     Operator        = 14
     KeywordDef      = 15
-    KeywordVar      = 16
-    KeywordBool     = 17
-    KeywordInt      = 18
-    KeywordReal     = 19
-    KeywordPackage  = 20
-    TypeSep         = 21
+    KeywordBool     = 16
+    KeywordInt      = 17
+    KeywordReal     = 18
+    TypeSep         = 19
 
 
 class Token:
