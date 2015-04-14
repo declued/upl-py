@@ -1,0 +1,61 @@
+from enum import Enum
+
+class BasicType(Enum):
+    Bool        = 0
+    Int         = 1
+    Real        = 2
+
+class AnalyzeNode(object):
+    pass
+
+class FuncDefAnalyzeNode(AnalyzeNode):
+    def __init__(self, name, arg_types, return_type):
+        self.name = name
+        self.arg_types = arg_types
+        self.return_type = return_type
+        self.body = None
+
+    def to_dict(self):
+        return dict(
+            type = "FuncDefAnalyzeNode",
+            name = self.name,
+            arg_types = [str(arg_type) for arg_type in self.arg_types],
+            return_type = str(self.return_type),
+            body = self.body.to_dict()
+        )
+
+class FuncArgAnalyzeNode(AnalyzeNode):
+    def __init__(self, index, type):
+        self.index = index
+        self.type = type
+
+    def to_dict(self):
+        return dict(
+            type = "FuncArgAnalyzeNode",
+            index = self.index,
+            arg_type = str(self.type)
+        )
+
+class ConstantAnalyzeNode(AnalyzeNode):
+    def __init__(self, type, value):
+        self.type = type
+        self.value = value
+
+    def to_dict(self):
+        return dict(
+            type = "ConstantAnalyzeNode",
+            value = self.value,
+            value_type = str(self.type)
+        )
+
+class FuncCallAnalyzeNode(AnalyzeNode):
+    def __init__(self, function, args):
+        self.function = function
+        self.args = args
+
+    def to_dict(self):
+        return dict(
+            type = "FuncCallAnalyzeNode",
+            function = self.function.name,
+            args = [arg.to_dict() for arg in self.args]
+        )

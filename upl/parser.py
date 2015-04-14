@@ -269,7 +269,7 @@ class Parser(object):
            return None, None
 
         arg_list = self.parse_function_def_args(tokens[1:idxs[0]-1])
-        return_type = tokens[idxs[0]+1]
+        return_type = tokens[idxs[0]+1].type
 
         if arg_list is None or return_type is None:
             return None, None

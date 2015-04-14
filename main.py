@@ -1,16 +1,20 @@
-from upl import lexer, parser, analyzer
+from upl import lexer, parser, semantic_analyzer
+import json
 
 if __name__ == "__main__":
     program = """
-    def a = 3;
-    def fib = (n: int) -> int {
-        def result = if(n <= 1, 1, fib(n - 1) + fib(n - 2));
-        result;
-    }
+    def add = (a: int, b: int) -> int {
+        a;
+    };
+    def x = (b: int) -> int {
+        var c = add(b, 4);
+        add(c, 1);
+    };
     """
     tokens = lexer.tokenize_program(program)
     parse_tree = parser.Parser(tokens).parse()
-    constants, names = analyzer.Analyzer(parse_tree).analyze()
+    funcs = semantic_analyzer.SemanticAnalyzer(parse_tree).analyze()
+    for func in funcs:
+        print json.dumps(func.to_dict(), indent=2)
+        print ""
 
-    print constants
-    print names
