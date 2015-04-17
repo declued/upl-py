@@ -1,5 +1,6 @@
 import re
 from upl.token import TokenType, Token
+from upl.exceptions import LexerException
 
 DEFAULT_VALUE_FUNC = lambda v: None
 
@@ -73,7 +74,7 @@ def tokenize_line(line, row, col):
                                     location = (row, col))
 
     if first_token is None:
-        return [Token(TokenType.Error, location = (row, col))]
+        raise LexerException("Invalid token", row, col)
     else:
         token_len = len(first_token.uncooked)
         line_tail = line[token_len:]

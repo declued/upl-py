@@ -1,7 +1,6 @@
 from enum import Enum
 
 class TokenType(Enum):
-    Error           = -1
     EOI             = 0
     BoolLiteral     = 1
     IntLiteral      = 2

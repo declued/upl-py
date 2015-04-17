@@ -1,6 +1,7 @@
 import unittest
 from upl import lexer
 from upl.token import Token, TokenType
+from upl.exceptions import LexerException
 
 class TestLexer(unittest.TestCase):
     def test_simple_definition(self):
@@ -99,8 +100,8 @@ class TestLexer(unittest.TestCase):
                               ["a_variable", "a123", "CamelCase"])
 
     def test_errors(self):
-        self.checkTokenTypes("`123 440400 4",
-                             [TokenType.Error])
+        with self.assertRaises(LexerException):
+            lexer.tokenize_program("`123 440400 4")
 
     def test_location_info(self):
         tokens = lexer.tokenize_program("1  2\n3 4 #comment\n\n  5;")
