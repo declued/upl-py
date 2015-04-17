@@ -1,6 +1,7 @@
 import unittest
 from tests_common import UPLTestCase
 from upl import lexer, parser, parse_nodes
+from upl.exceptions import ParserException
 import json
 
 INT_TYPE_NODE = "TokenType.KeywordInt"
@@ -383,9 +384,9 @@ class TestParser(UPLTestCase):
         })
 
     def checkParseFails(self, program):
-        tokens = lexer.tokenize_program(program)
-        parse_tree = parser.Parser(tokens).parse()
-        self.assertIsNone(parse_tree)
+        with self.assertRaises(ParserException):
+            tokens = lexer.tokenize_program(program)
+            parse_tree = parser.Parser(tokens).parse()
 
     def checkParseTree(self, program, partial_parse_tree):
         tokens = lexer.tokenize_program(program)

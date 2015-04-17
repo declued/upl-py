@@ -2,10 +2,9 @@
 class UPLException(Exception):
     """Root exception for all exceptions that happen in UPL"""
 
-    def __init__(self, description, row=0, col=0):
+    def __init__(self, description, location=(0, 0)):
         super(UPLException, self).__init__(description)
-        self.row = row
-        self.col = col
+        self.location = location
 
 class LexerException(UPLException):
     """Exceptions that happen while lexing"""

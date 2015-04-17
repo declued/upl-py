@@ -5,6 +5,7 @@ from upl.parse_nodes import ProgramNode, DeclNode, FuncDefNode, BoolLiteralNode,
                             IntLiteralNode, RealLiteralNode, FuncCallNode,\
                             BinaryOperationNode, UnaryOperationNode,\
                             IdentifierNode, FuncArgNode
+from upl.exceptions import ParserException
 
 operator_groups = (
     ('||', '^^', '&&'),
@@ -55,7 +56,8 @@ class Parser(object):
                 statements.append(statement)
                 tokens = tokens[len(statement_tokens) + 1:]
             else:
-                return None
+                raise ParserException("Couldn't parse statement",
+                                      location=statement_tokens[0].location)
 
         return statements
 
@@ -87,20 +89,27 @@ class Parser(object):
         else:
             declarator = tokens[0].type
 
+        # After matching the declarator we are pretty sure that the user intended
+        # to have a declaration here, so we throw local exceptions to give more
+        # useful errors to user.
+
         # match the identifier
         if tokens[1].type != TokenType.Identifier:
-            return None
+            raise ParserException("Expected identifier", 
+                                  location=tokens[1].location)
         else:
             identifier = tokens[1].value
 
         # match the assignment sign
         if tokens[2].type != TokenType.Assignment:
-            return None
+            raise ParserException("Expected assignment sign",
+                                  location=tokens[2].location)
 
         # match the expression
         expression = self.parse_expression(tokens[3:])
         if expression is None:
-            return None
+            raise ParserException("Expected expression",
+                                  location=tokens[3].location)
 
         declaration = DeclNode(declarator, identifier, expression)
         return declaration
