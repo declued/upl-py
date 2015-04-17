@@ -172,22 +172,22 @@ class TestParser(UPLTestCase):
         })
 
     def test_decl_error_1(self):
-        self.checkParseFails("var a;")
+        self.checkParseFails("def a;")
 
     def test_decl_error_2(self):
-        self.checkParseFails("var a: 12 = 1;")
+        self.checkParseFails("def a: 12 = 1;")
 
     def test_decl_error_3(self):
-        self.checkParseFails("var a: int = {}")
+        self.checkParseFails("def a: int = {}")
 
     def test_decl_error_4(self):
         self.checkParseFails("def;")
 
     def test_decl_error_5(self):
-        self.checkParseFails("var 123 = 12;")
+        self.checkParseFails("def 123 = 12;")
 
     def test_decl_error_6(self):
-        self.checkParseFails("var a == 123;")
+        self.checkParseFails("def a == 123;")
 
     def test_function_call_1(self):
         self.checkParseTree("F()", {
