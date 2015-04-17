@@ -178,7 +178,7 @@ class TestParser(UPLTestCase):
         self.checkParseFails("def a: 12 = 1;")
 
     def test_decl_error_3(self):
-        self.checkParseFails("def a: int = {}")
+        self.checkParseFails("def a = {}")
 
     def test_decl_error_4(self):
         self.checkParseFails("def;")
