@@ -27,20 +27,23 @@ class Parser(object):
 
     def parse_program(self, tokens):
         """
-        On success returns a program, otherwise returns None.
+        On success returns a program, otherwise raises an ParserException.
 
         program := statement [| program];
         """
-        statements = self.parse_statement_list(tokens)
-        if statements is None:
-            return None
+        try:
+            statements = self.parse_statement_list(tokens)
+        except ParserException as e:
+            raise e
 
         program = ProgramNode(statements)
+
         return program
 
     def parse_statement_list(self, tokens):
         """
-        On success returns a list of statements, otherwise returns None.
+        On success returns a list of statements, otherwise raises an
+        ParserException.
         """
         statements = []
 
@@ -51,32 +54,38 @@ class Parser(object):
                 tokens = tokens[1:]
                 continue
 
-            statement = self.parse_statement(statement_tokens)
-            if statement is not None:
-                statements.append(statement)
-                tokens = tokens[len(statement_tokens) + 1:]
-            else:
-                raise ParserException("Couldn't parse statement",
-                                      location=statement_tokens[0].location)
+            try:
+                statement = self.parse_statement(statement_tokens)
+            except ParserException as e:
+                raise e
+
+            statements.append(statement)
+            tokens = tokens[len(statement_tokens) + 1:]
 
         return statements
 
     def parse_statement(self, tokens):
         """
         On success returns a statement and increments token_index, otherwise
-        returns None.
+        raises an ParserException.
 
         statement := declaration ";" | expression ";";
         """
+
         statement = self.parse_declaration(tokens) or\
                     self.parse_expression(tokens)
+        
+        if statement is None:
+            raise ParserException("Could not parse statement",
+                                  location=tokens[0].location)
 
         return statement
 
     def parse_declaration(self, tokens):
         """
-        On success returns a declaration and increments the token_index, otherwise
-        returns None.
+        On success returns a declaration and increments the token_index.
+        On failure, it raises a ParserException if it is sure this was meant to
+        be a declaration. Otherwise it returns None.
 
         declaration := "def" identifier "=" expression;
         """
