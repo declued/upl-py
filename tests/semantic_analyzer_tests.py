@@ -67,7 +67,7 @@ class TestSemanticAnalyzer(UPLTestCase):
         tokens = lexer.tokenize_program(program)
         parse_tree = parser.Parser(tokens).parse()
         self.assertIsNotNone(parse_tree)
-        semantic_tree = semantic_analyzer.SemanticAnalyzer(parse_tree).analyze()
-        semantic_tree_dict = [f.to_dict() for f in semantic_tree]
+        consts, funcs = semantic_analyzer.SemanticAnalyzer(parse_tree).analyze()
+        semantic_tree_dict = [f.to_dict() for f in funcs]
 
         self.matchValues(semantic_tree_dict, partial_semantic_tree)
