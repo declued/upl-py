@@ -1,4 +1,3 @@
-from itertools import chain
 from upl.token import TokenType, Token
 from upl.parse_nodes import ProgramNode, DeclNode, FuncDefNode, BoolLiteralNode,\
                             IntLiteralNode, RealLiteralNode, FuncCallNode,\
@@ -7,6 +6,7 @@ from upl.parse_nodes import ProgramNode, DeclNode, FuncDefNode, BoolLiteralNode,
 from upl.semantic_analyze_nodes import BasicType, FuncDefAnalyzeNode,\
                                        FuncArgAnalyzeNode, ConstantAnalyzeNode,\
                                        FuncCallAnalyzeNode, ConditionalAnalyzeNode
+from upl.exceptions import SemanticAnalyzerException
 
 class SemanticAnalyzer(object):
     def __init__(self, parse_tree):
@@ -53,21 +53,24 @@ class SemanticAnalyzer(object):
                 func_body = self.analyze_function_body(s.expression,
                                                        symtab.copy())
                 if self.resolve_type(func_body) != func_def.return_type:
-                    raise Exception("Return type mismatch")
+                    raise SemanticAnalyzerException("Return type mismatch",
+                                                    s.location)
                 func_def.body = func_body
             elif s.identifier in symtab:
-                raise Exception("Duplicate identifier %s" % (s.identifier, ))
+                raise SemanticAnalyzerException("Duplicate identifier %s"\
+                                                 % (s.identifier, ), s.location)
             else:
                 symtab[s.identifier] = [self.analyze_expression(s.expression,
                                                                 symtab.copy())]
 
     def analyze_function_body(self, node, symtab):
         if len(node.statements) == 0:
-            raise Exception("Empty function body")
+            raise SemanticAnalyzerException("Empty function body", node.location)
 
         for index, arg in enumerate(node.arg_list):
             if arg.name in symtab:
-                raise Exception("Duplicate identifier %s" % (arg.name, ))
+                raise SemanticAnalyzerException("Duplicate identifier %s" % (arg.name, ),
+                                                arg.location)
             type = self.parse_to_analyze_type(arg.type)
             symtab[arg.name] = [FuncArgAnalyzeNode(index, type)]
         
@@ -76,22 +79,25 @@ class SemanticAnalyzer(object):
                 continue
 
             if s.identifier in symtab:
-                raise Exception("Duplicate identifier %s" % (s.identifier, ))
+                raise SemanticAnalyzerException("Duplicate identifier %s"\
+                                                % (s.identifier, ), s.location)
             if isinstance(s.expression, FuncDefNode):
-                raise Exception("Nested functions are not supported")
+                raise SemanticAnalyzerException("Nested functions are not supported",
+                                                s.location)
             else:
                 symtab[s.identifier] = [self.analyze_expression(s.expression,
                                                                 symtab.copy())]
 
         if not isinstance(node.statements[-1], ExpressionNode):
-            raise Exception("Return value must be an expression")
+            raise SemanticAnalyzerException("Return value must be an expression")
 
         result = self.analyze_expression(node.statements[-1], symtab.copy())
         result_type = self.resolve_type(result)
 
         if result_type != self.parse_to_analyze_type(node.return_type):
-            raise Exception ("Expected %s, but received %s." % (str(node.return_type),
-                                                                str(result_type)))
+            raise SemanticAnalyzerException ("Expected %s, but received %s."\
+                                             % (str(node.return_type), str(result_type)),
+                                             node.statements[-1].location)
 
         return result
 
@@ -100,7 +106,7 @@ class SemanticAnalyzer(object):
             if (func_def.name, func_def.arg_types) == (name, arg_types):
                 return func_def
         
-        raise Exception("Could not resolve function %s %s" % (name, str(arg_types)))
+        raise SemanticAnalyzerException("Could not resolve function %s %s" % (name, str(arg_types)))
 
     def analyze_expression(self, node, symtab):
         if isinstance(node, BoolLiteralNode):
@@ -130,7 +136,8 @@ class SemanticAnalyzer(object):
             return self.analyze_conditional(node, symtab)
 
         else:
-            raise Exception("Unexpected %s" % (str(node), ))
+            raise SemanticAnalyzerException("Unexpected %s" % (str(node), ),
+                                            node.location)
 
 
     def analyze_literal(self, type, value):
@@ -138,10 +145,10 @@ class SemanticAnalyzer(object):
 
     def analyze_identifier(self, name, symtab):
         if name not in symtab:
-            raise Exception("%s could not be resolved" % (name, ))
+            raise SemanticAnalyzerException("%s could not be resolved" % (name, ))
 
         if isinstance(symtab[name][0], FuncDefAnalyzeNode):
-            raise Exception("%s references a function" % (name, ))
+            raise SemanticAnalyzerException("%s references a function" % (name, ))
 
         return symtab[name][0]
 
@@ -158,10 +165,12 @@ class SemanticAnalyzer(object):
         on_false = self.analyze_expression(node.on_false, symtab)
 
         if self.resolve_type(condition) != BasicType.Bool:
-            raise Exception("Expected boolean condition")
+            raise SemanticAnalyzerException("Expected boolean condition",
+                                            node.condition.location)
 
         if self.resolve_type(on_true) != self.resolve_type(on_false):
-            raise Exception("Branch types do not match")
+            raise SemanticAnalyzerException("Branch types do not match",
+                                            node.location)
 
         return ConditionalAnalyzeNode(condition, on_true, on_false)
 
@@ -173,7 +182,7 @@ class SemanticAnalyzer(object):
         elif parse_type == TokenType.KeywordReal:
             return BasicType.Real
         else:
-            raise Exception("%s is not a valid type" % (parse_type, ))
+            raise SemanticAnalyzerException("%s is not a valid type" % (parse_type, ))
 
     def resolve_type(self, node):
         if isinstance(node, FuncArgAnalyzeNode):
@@ -189,4 +198,4 @@ class SemanticAnalyzer(object):
             return self.resolve_type(node.on_true)
 
         else:
-            raise Exception("could not resolve type for %s" % (node, ))
+            raise SemanticAnalyzerException("could not resolve type for %s" % (node, ))
