@@ -3,14 +3,15 @@ from enum import Enum
 _next_parse_node_id = 0
 
 class ParseNode(object):
-    def __init__(self):
+    def __init__(self, location):
         global _next_parse_node_id
         self.id = _next_parse_node_id
         _next_parse_node_id += 1
+        self.location = location
 
 class ProgramNode(ParseNode):
-    def __init__(self, statements):
-        super(ProgramNode, self).__init__()
+    def __init__(self, location, statements):
+        super(ProgramNode, self).__init__(location)
         self.statements = statements
 
     def to_dict(self):
@@ -23,8 +24,8 @@ class StatementNode(ParseNode):
     pass
 
 class DeclNode(StatementNode):
-    def __init__(self, declarator, identifier, expression):
-        super(DeclNode, self).__init__()
+    def __init__(self, location, declarator, identifier, expression):
+        super(DeclNode, self).__init__(location)
         self.declarator = declarator
         self.identifier = identifier
         self.expression = expression
@@ -41,7 +42,8 @@ class ExpressionNode(StatementNode):
     pass
 
 class ConditionalNode(ExpressionNode):
-    def __init__(self, condition, on_true, on_false):
+    def __init__(self, location, condition, on_true, on_false):
+        super(ConditionalNode, self).__init__(location)
         self.condition = condition
         self.on_true = on_true
         self.on_false = on_false
@@ -55,8 +57,8 @@ class ConditionalNode(ExpressionNode):
         )
 
 class FuncDefNode(ExpressionNode):
-    def __init__(self, arg_list, return_type, statements):
-        super(FuncDefNode, self).__init__()
+    def __init__(self, location, arg_list, return_type, statements):
+        super(FuncDefNode, self).__init__(location)
         self.statements = statements
         self.arg_list = arg_list
         self.return_type = return_type
@@ -70,8 +72,8 @@ class FuncDefNode(ExpressionNode):
         )
 
 class FuncArgNode(ParseNode):
-    def __init__(self, name, type, index):
-        super(FuncArgNode, self).__init__()
+    def __init__(self, location, name, type, index):
+        super(FuncArgNode, self).__init__(location)
         self.name = name
         self.type = type
         self.index = index
@@ -80,8 +82,8 @@ class LiteralNode(ExpressionNode):
     pass
 
 class BoolLiteralNode(LiteralNode):
-    def __init__(self, value):
-        super(BoolLiteralNode, self).__init__()
+    def __init__(self, location, value):
+        super(BoolLiteralNode, self).__init__(location)
         self.value = value
 
     def to_dict(self):
@@ -91,8 +93,8 @@ class BoolLiteralNode(LiteralNode):
         )
 
 class IntLiteralNode(LiteralNode):
-    def __init__(self, value):
-        super(IntLiteralNode, self).__init__()
+    def __init__(self, location, value):
+        super(IntLiteralNode, self).__init__(location)
         self.value = value
 
     def to_dict(self):
@@ -102,8 +104,8 @@ class IntLiteralNode(LiteralNode):
         )
 
 class RealLiteralNode(LiteralNode):
-    def __init__(self, value):
-        super(RealLiteralNode, self).__init__()
+    def __init__(self, location, value):
+        super(RealLiteralNode, self).__init__(location)
         self.value = value
 
     def to_dict(self):
@@ -113,8 +115,8 @@ class RealLiteralNode(LiteralNode):
         )
 
 class IdentifierNode(ExpressionNode):
-    def __init__(self, name):
-        super(IdentifierNode, self).__init__()
+    def __init__(self, location, name):
+        super(IdentifierNode, self).__init__(location)
         self.name = name
 
     def to_dict(self):
@@ -124,8 +126,8 @@ class IdentifierNode(ExpressionNode):
         )
 
 class FuncCallNode(ExpressionNode):
-    def __init__(self, name, args):
-        super(FuncCallNode, self).__init__()
+    def __init__(self, location, name, args):
+        super(FuncCallNode, self).__init__(location)
         self.name = name
         self.args = args
 
@@ -137,8 +139,8 @@ class FuncCallNode(ExpressionNode):
         )
 
 class BinaryOperationNode(ExpressionNode):
-    def __init__(self, operator, left_operand, right_operand):
-        super(BinaryOperationNode, self).__init__()
+    def __init__(self, location, operator, left_operand, right_operand):
+        super(BinaryOperationNode, self).__init__(location)
         self.operator = operator
         self.left_operand = left_operand
         self.right_operand = right_operand
@@ -152,8 +154,8 @@ class BinaryOperationNode(ExpressionNode):
         )
 
 class UnaryOperationNode(ExpressionNode):
-    def __init__(self, operator, operand):
-        super(UnaryOperationNode, self).__init__()
+    def __init__(self, location, operator, operand):
+        super(UnaryOperationNode, self).__init__(location)
         self.operator = operator
         self.operand = operand
 

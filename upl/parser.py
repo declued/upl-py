@@ -36,7 +36,7 @@ class Parser(object):
         except ParserException as e:
             raise e
 
-        program = ProgramNode(statements)
+        program = ProgramNode((1, 1), statements)
 
         return program
 
@@ -120,7 +120,8 @@ class Parser(object):
             raise ParserException("Expected expression",
                                   location=tokens[3].location)
 
-        declaration = DeclNode(declarator, identifier, expression)
+        declaration = DeclNode(tokens[0].location, declarator,
+                               identifier, expression)
         return declaration
 
     def get_first_statement(self, tokens):
@@ -188,7 +189,8 @@ class Parser(object):
         if condition is None or on_true is None or on_false is None:
             return None
 
-        conditional = ConditionalNode(condition, on_true, on_false)
+        conditional = ConditionalNode(tokens[0].location, condition,
+                                      on_true, on_false)
         return conditional
 
     def parse_binary_operation(self, tokens):
@@ -214,7 +216,8 @@ class Parser(object):
             return None
 
         # create the result
-        binary_operation = BinaryOperationNode(operator, left_operand, right_operand)
+        binary_operation = BinaryOperationNode(tokens[0].location, operator,
+                                               left_operand, right_operand)
 
         return binary_operation
 
@@ -233,7 +236,7 @@ class Parser(object):
         if operand is None:
             return None
 
-        unary_operation = UnaryOperationNode(operator, operand)
+        unary_operation = UnaryOperationNode(tokens[0].location, operator, operand)
 
         return unary_operation
 
@@ -254,7 +257,7 @@ class Parser(object):
         if args is None:
             return None
 
-        function_call = FuncCallNode(name, args)
+        function_call = FuncCallNode(tokens[0].location, name, args)
         return function_call
 
     def parse_function_call_args(self, tokens):
@@ -299,7 +302,8 @@ class Parser(object):
            function_body is None:
             return None
 
-        function_def = FuncDefNode(arg_list, return_type, function_body)
+        function_def = FuncDefNode(tokens[0].location, arg_list,
+                                   return_type, function_body)
 
         return function_def
 
@@ -369,7 +373,7 @@ class Parser(object):
 
         type = tokens[2].type
         identifier = tokens[0].value
-        typed_var = FuncArgNode(identifier, type, index)
+        typed_var = FuncArgNode(tokens[0].location, identifier, type, index)
 
         return typed_var
 
@@ -380,7 +384,7 @@ class Parser(object):
         if len(tokens) != 1 or tokens[0].type != TokenType.Identifier:
             return None
 
-        identifier = IdentifierNode(tokens[0].value)
+        identifier = IdentifierNode(tokens[0].location, tokens[0].value)
         return identifier
 
     def parse_literal(self, tokens):
@@ -401,7 +405,7 @@ class Parser(object):
 
         node_type = token_to_node_type.get(tokens[0].type)
         if node_type is not None:
-            literal = node_type(tokens[0].value)
+            literal = node_type(tokens[0].location, tokens[0].value)
 
         return literal
 
