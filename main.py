@@ -6,9 +6,8 @@ if __name__ == "__main__":
     def add = (a: int, b: int) -> int {
         a;
     };
-    def x = (b: int) -> int {
-        var c = add(b, 4);
-        add(c, 1);
+    def fib = (b: int) -> int {
+        if true then 1 else 2
     };
     """
     tokens = lexer.tokenize_program(program)

@@ -3,10 +3,10 @@ from upl.token import TokenType, Token
 from upl.parse_nodes import ProgramNode, DeclNode, FuncDefNode, BoolLiteralNode,\
                             IntLiteralNode, RealLiteralNode, FuncCallNode,\
                             BinaryOperationNode, UnaryOperationNode,\
-                            IdentifierNode, ExpressionNode
+                            IdentifierNode, ExpressionNode, ConditionalNode
 from upl.semantic_analyze_nodes import BasicType, FuncDefAnalyzeNode,\
                                        FuncArgAnalyzeNode, ConstantAnalyzeNode,\
-                                       FuncCallAnalyzeNode
+                                       FuncCallAnalyzeNode, ConditionalAnalyzeNode
 
 class SemanticAnalyzer(object):
     def __init__(self, parse_tree):
@@ -126,6 +126,9 @@ class SemanticAnalyzer(object):
             args = [node.operand]
             return self.analyze_func_call(node.operator, args, symtab)
 
+        elif isinstance(node, ConditionalNode):
+            return self.analyze_conditional(node, symtab)
+
         else:
             raise Exception("Unexpected %s" % (str(node), ))
 
@@ -149,6 +152,19 @@ class SemanticAnalyzer(object):
 
         return FuncCallAnalyzeNode(resolved_func, analyzed_args)
 
+    def analyze_conditional(self, node, symtab):
+        condition = self.analyze_expression(node.condition, symtab)
+        on_true = self.analyze_expression(node.on_true, symtab)
+        on_false = self.analyze_expression(node.on_false, symtab)
+
+        if self.resolve_type(condition) != BasicType.Bool:
+            raise Exception("Expected boolean condition")
+
+        if self.resolve_type(on_true) != self.resolve_type(on_false):
+            raise Exception("Branch types do not match")
+
+        return ConditionalAnalyzeNode(condition, on_true, on_false)
+
     def parse_to_analyze_type(self, parse_type):
         if parse_type == TokenType.KeywordInt:
             return BasicType.Int
@@ -168,6 +184,9 @@ class SemanticAnalyzer(object):
 
         elif isinstance(node, FuncCallAnalyzeNode):
             return node.function.return_type
+
+        elif isinstance(node, ConditionalAnalyzeNode):
+            return self.resolve_type(node.on_true)
 
         else:
             raise Exception("could not resolve type for %s" % (node, ))

@@ -59,3 +59,17 @@ class FuncCallAnalyzeNode(AnalyzeNode):
             function = self.function.name,
             args = [arg.to_dict() for arg in self.args]
         )
+
+class ConditionalAnalyzeNode(AnalyzeNode):
+    def __init__(self, condition, on_true, on_false):
+        self.condition = condition
+        self.on_true = on_true
+        self.on_false = on_false
+
+    def to_dict(self):
+        return dict(
+            type = "ConditionalAnalyzeNode",
+            condition = self.condition.to_dict(),
+            on_true = self.on_true.to_dict(),
+            on_false = self.on_false.to_dict()
+        )
