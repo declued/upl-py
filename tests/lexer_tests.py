@@ -16,7 +16,7 @@ class TestLexer(unittest.TestCase):
     def test_simple_program(self):
         self.checkTokenTypes("""
             def abs = (v: int) -> int { # Calculates absolute value
-                def result = if(v>0,v,-v);
+                def result = if v>0 then v else -v;
                 result;
             }
             """, [
@@ -24,12 +24,11 @@ class TestLexer(unittest.TestCase):
             TokenType.OpenParen, TokenType.Identifier, TokenType.TypeSep,
             TokenType.KeywordInt, TokenType.CloseParen, TokenType.ReturnsSep,
             TokenType.KeywordInt, TokenType.OpenBracket, TokenType.KeywordDef,
-            TokenType.Identifier, TokenType.Assignment, TokenType.Identifier,
-            TokenType.OpenParen, TokenType.Identifier, TokenType.Operator,
-            TokenType.IntLiteral, TokenType.ArgumentSep, TokenType.Identifier,
-            TokenType.ArgumentSep, TokenType.Operator, TokenType.Identifier,
-            TokenType.CloseParen, TokenType.StatementSep, TokenType.Identifier,
-            TokenType.StatementSep, TokenType.CloseBracket])
+            TokenType.Identifier, TokenType.Assignment, TokenType.KeywordIf,
+            TokenType.Identifier, TokenType.Operator, TokenType.IntLiteral,
+            TokenType.KeywordThen, TokenType.Identifier, TokenType.KeywordElse,
+            TokenType.Operator, TokenType.Identifier, TokenType.StatementSep,
+            TokenType.Identifier, TokenType.StatementSep, TokenType.CloseBracket])
 
     def test_bool_literal_types(self):
         self.checkTokenTypes("true false truex falsex",

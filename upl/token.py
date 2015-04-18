@@ -20,7 +20,10 @@ class TokenType(Enum):
     KeywordBool     = 16
     KeywordInt      = 17
     KeywordReal     = 18
-    TypeSep         = 19
+    KeywordIf       = 19
+    KeywordThen     = 20
+    KeywordElse     = 21
+    TypeSep         = 22
 
 
 class Token:
