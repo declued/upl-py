@@ -43,7 +43,6 @@ class SemanticAnalyzer(object):
                                                        return_type)
                     func_defs.append(func_def_node)
                 else:
-                    print func_defs
                     raise SemanticAnalyzerException("Duplicate function %s" %\
                                                     (name, ))
 
