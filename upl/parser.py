@@ -4,7 +4,7 @@ import json
 from upl.parse_nodes import ProgramNode, DeclNode, FuncDefNode, BoolLiteralNode,\
                             IntLiteralNode, RealLiteralNode, FuncCallNode,\
                             BinaryOperationNode, UnaryOperationNode,\
-                            IdentifierNode, FuncArgNode
+                            IdentifierNode, FuncArgNode, ConditionalNode
 from upl.exceptions import ParserException
 
 operator_groups = (
@@ -143,7 +143,8 @@ class Parser(object):
         expression := binary_operation | unary_operation | func_call | func_def |
                       identifier | literal | "(" expression ")";
         """
-        expression = self.parse_binary_operation(tokens) or\
+        expression = self.parse_conditional(tokens) or\
+                     self.parse_binary_operation(tokens) or\
                      self.parse_unary_operation(tokens) or\
                      self.parse_function_call(tokens) or\
                      self.parse_function_def(tokens) or\
@@ -157,6 +158,38 @@ class Parser(object):
            expression = self.parse_expression(tokens[1:-1])
 
         return expression
+
+    def parse_conditional(self, tokens):
+        """
+        On success returns a conditional expression, otherwise returns None.
+
+        conditional := "if" expression "then" expression "else" expression;
+        """
+
+        if len(tokens) < 5 or tokens[0].type != TokenType.KeywordIf:
+            return None
+
+        then_idxs = self.find_delimiters(tokens, TokenType.KeywordThen)
+        if len(then_idxs) < 1:
+            return None
+
+        then_idx = then_idxs[0]
+
+        else_idxs = self.find_delimiters(tokens[then_idx:], TokenType.KeywordElse)
+        if len(else_idxs) < 1:
+            return None
+
+        else_idx = else_idxs[0] + then_idx
+
+        condition = self.parse_expression(tokens[1:then_idx])
+        on_true = self.parse_expression(tokens[then_idx+1:else_idx])
+        on_false = self.parse_expression(tokens[else_idx+1:])
+
+        if condition is None or on_true is None or on_false is None:
+            return None
+
+        conditional = ConditionalNode(condition, on_true, on_false)
+        return conditional
 
     def parse_binary_operation(self, tokens):
         """

@@ -30,6 +30,50 @@ class TestParser(UPLTestCase):
             ]
         })
 
+    def test_conditionals_1(self):
+        self.checkParseTree("if a then b else c;", {
+            "statements": [
+                {
+                    "type": "ConditionalNode",
+                    "condition": {"type": "IdentifierNode"},
+                    "on_true": {"type": "IdentifierNode"},
+                    "on_false": {"type": "IdentifierNode"}
+                }
+            ]
+        })
+
+    def test_conditionals_2(self):
+        self.checkParseTree("if a then b else if c then d else e;", {
+            "statements": [
+                {
+                    "type": "ConditionalNode",
+                    "condition": {"type": "IdentifierNode"},
+                    "on_true": {"type": "IdentifierNode"},
+                    "on_false": {
+                        "type": "ConditionalNode",
+                        "condition": {"type": "IdentifierNode"},
+                        "on_true": {"type": "IdentifierNode"},
+                        "on_false": {"type": "IdentifierNode"}
+                    }
+                }
+            ]
+        })
+
+    def test_conditional_error_1(self):
+        self.checkParseFails("if a == 1 && b == 2;")
+
+    def test_conditional_error_2(self):
+        self.checkParseFails("if a then b + 4 * 3;")
+
+    def test_conditional_error_3(self):
+        self.checkParseFails("if - then b else c;")
+
+    def test_conditional_error_4(self):
+        self.checkParseFails("if a then - else c;")
+
+    def test_conditional_error_5(self):
+        self.checkParseFails("if - then b else -;")
+
     def test_binary_operations(self):
         self.checkParseTree("1 + 2 + 3; 4 * 5 + 6 * 7;", {
             "statements": [

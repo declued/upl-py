@@ -40,6 +40,20 @@ class DeclNode(StatementNode):
 class ExpressionNode(StatementNode):
     pass
 
+class ConditionalNode(ExpressionNode):
+    def __init__(self, condition, on_true, on_false):
+        self.condition = condition
+        self.on_true = on_true
+        self.on_false = on_false
+
+    def to_dict(self):
+        return dict(
+            type = "ConditionalNode",
+            condition = self.condition.to_dict(),
+            on_true = self.on_true.to_dict(),
+            on_false = self.on_false.to_dict()
+        )
+
 class FuncDefNode(ExpressionNode):
     def __init__(self, arg_list, return_type, statements):
         super(FuncDefNode, self).__init__()
