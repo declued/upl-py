@@ -12,7 +12,7 @@ if __name__ == "__main__":
     """
     tokens = lexer.tokenize_program(program)
     parse_tree = parser.Parser(tokens).parse()
-    funcs = semantic_analyzer.SemanticAnalyzer(parse_tree).analyze()
+    consts, funcs = semantic_analyzer.SemanticAnalyzer(parse_tree).analyze()
     for func in funcs:
         print json.dumps(func.to_dict(), indent=2)
         print ""

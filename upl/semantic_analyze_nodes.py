@@ -37,15 +37,15 @@ class FuncArgAnalyzeNode(AnalyzeNode):
         )
 
 class ConstantAnalyzeNode(AnalyzeNode):
-    def __init__(self, type, value):
-        self.type = type
-        self.value = value
+    def __init__(self, index, const_table):
+        self.index = index
+        self.const_table = const_table
 
     def to_dict(self):
         return dict(
             type = "ConstantAnalyzeNode",
-            value = self.value,
-            value_type = str(self.type)
+            value = self.const_table[self.index][1],
+            value_type = str(self.const_table[self.index][0])
         )
 
 class FuncCallAnalyzeNode(AnalyzeNode):

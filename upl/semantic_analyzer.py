@@ -1,3 +1,4 @@
+from itertools import chain
 from upl.token import TokenType, Token
 from upl.parse_nodes import ProgramNode, DeclNode, FuncDefNode, BoolLiteralNode,\
                             IntLiteralNode, RealLiteralNode, FuncCallNode,\
@@ -14,10 +15,12 @@ class SemanticAnalyzer(object):
 
     def analyze(self):
         self.func_defs = self.get_func_defs(self.parse_tree)
+        self.consts = self.get_consts(self.parse_tree)
+        self.consts = list(set(self.consts))
         symtab = self.initialize_symtab(self.func_defs)
         self.analyze_program(self.parse_tree, symtab)
 
-        return self.func_defs
+        return self.consts, self.func_defs
 
     def get_func_defs(self, node):
         func_defs = []
@@ -31,6 +34,43 @@ class SemanticAnalyzer(object):
                 func_defs.append(FuncDefAnalyzeNode(name, arg_types, return_type))
 
         return func_defs
+
+    def get_consts(self, node):
+        if isinstance(node, ProgramNode):
+            return list(chain(*[self.get_consts(s) for s in node.statements]))
+
+        elif isinstance(node, DeclNode):
+            return self.get_consts(node.expression)
+
+        elif isinstance(node, FuncDefNode):
+            return list(chain(*[self.get_consts(s) for s in node.statements]))
+        
+        elif isinstance(node, FuncCallNode):
+            return list(chain(*[self.get_consts(s) for s in node.args]))
+        
+        elif isinstance(node, ConditionalNode):
+            return self.get_consts(node.condition) +\
+                   self.get_consts(node.on_true) +\
+                   self.get_consts(node.on_false)
+
+        elif isinstance(node, BinaryOperationNode):
+            return self.get_consts(node.left_operand) +\
+                   self.get_consts(node.right_operand)
+
+        elif isinstance(node, UnaryOperationNode):
+            return self.get_consts(node.operand)
+        
+        elif isinstance(node, BoolLiteralNode):
+            return [(BasicType.Bool, node.value)]
+        
+        elif isinstance(node, IntLiteralNode):
+            return [(BasicType.Int, node.value)]
+        
+        elif isinstance(node, RealLiteralNode):
+            return [(BasicType.Real, node.value)]
+
+        else:
+            return []
 
     def initialize_symtab(self, func_defs):
         symtab = {}
@@ -141,7 +181,8 @@ class SemanticAnalyzer(object):
 
 
     def analyze_literal(self, type, value):
-        return ConstantAnalyzeNode(type, value)
+        return ConstantAnalyzeNode(self.consts.index((type, value)),
+                                   self.consts)
 
     def analyze_identifier(self, name, symtab):
         if name not in symtab:
@@ -189,7 +230,7 @@ class SemanticAnalyzer(object):
             return node.type
 
         elif isinstance(node, ConstantAnalyzeNode):
-            return node.type
+            return self.consts[node.index][0]
 
         elif isinstance(node, FuncCallAnalyzeNode):
             return node.function.return_type
