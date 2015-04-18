@@ -21,7 +21,7 @@ class FuncDefAnalyzeNode(AnalyzeNode):
             name = self.name,
             arg_types = [str(arg_type) for arg_type in self.arg_types],
             return_type = str(self.return_type),
-            body = self.body.to_dict()
+            body = self.body and self.body.to_dict()
         )
 
 class FuncArgAnalyzeNode(AnalyzeNode):

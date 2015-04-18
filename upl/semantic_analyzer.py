@@ -10,20 +10,24 @@ from upl.semantic_analyze_nodes import BasicType, FuncDefAnalyzeNode,\
 from upl.exceptions import SemanticAnalyzerException
 
 class SemanticAnalyzer(object):
-    def __init__(self, parse_tree):
+    def __init__(self, parse_tree, external_functions=None):
         self.parse_tree = parse_tree
+        self.external_functions = external_functions or []
 
     def analyze(self):
-        self.func_defs = self.get_func_defs(self.parse_tree)
+        self.func_defs = self.get_func_defs(self.parse_tree,
+                                            self.external_functions)
         self.consts = self.get_consts(self.parse_tree)
         self.consts = list(set(self.consts))
         symtab = self.initialize_symtab(self.func_defs)
         self.analyze_program(self.parse_tree, symtab)
 
+        self.func_defs = [f for f in self.func_defs if f.body is not None]
+
         return self.consts, self.func_defs
 
-    def get_func_defs(self, node):
-        func_defs = []
+    def get_func_defs(self, node, external_functions):
+        func_defs = external_functions
         for s in node.statements:
             if isinstance(s, DeclNode) and\
                isinstance(s.expression, FuncDefNode):
@@ -31,7 +35,17 @@ class SemanticAnalyzer(object):
                 arg_types = [self.parse_to_analyze_type(arg.type)\
                              for arg in s.expression.arg_list]
                 return_type = self.parse_to_analyze_type(s.expression.return_type)
-                func_defs.append(FuncDefAnalyzeNode(name, arg_types, return_type))
+
+                try:
+                    self.resolve_function(func_defs, name, arg_types)
+                except SemanticAnalyzerException:
+                    func_def_node = FuncDefAnalyzeNode(name, arg_types,
+                                                       return_type)
+                    func_defs.append(func_def_node)
+                else:
+                    print func_defs
+                    raise SemanticAnalyzerException("Duplicate function %s" %\
+                                                    (name, ))
 
         return func_defs
 
@@ -89,7 +103,8 @@ class SemanticAnalyzer(object):
             if isinstance(s.expression, FuncDefNode):
                 arg_types = [self.parse_to_analyze_type(arg.type)\
                              for arg in s.expression.arg_list]
-                func_def = self.resolve_function(s.identifier, arg_types)
+                func_def = self.resolve_function(self.func_defs,
+                                                 s.identifier, arg_types)
                 func_body = self.analyze_function_body(s.expression,
                                                        symtab.copy())
                 if self.resolve_type(func_body) != func_def.return_type:
@@ -141,8 +156,8 @@ class SemanticAnalyzer(object):
 
         return result
 
-    def resolve_function(self, name, arg_types):
-        for func_def in self.func_defs:
+    def resolve_function(self, func_defs, name, arg_types):
+        for func_def in func_defs:
             if (func_def.name, func_def.arg_types) == (name, arg_types):
                 return func_def
         
@@ -196,7 +211,7 @@ class SemanticAnalyzer(object):
     def analyze_func_call(self, name, args, symtab):
         analyzed_args = [self.analyze_expression(arg, symtab) for arg in args]
         arg_types = [self.resolve_type(arg) for arg in analyzed_args]
-        resolved_func = self.resolve_function(name, arg_types)
+        resolved_func = self.resolve_function(self.func_defs, name, arg_types)
 
         return FuncCallAnalyzeNode(resolved_func, analyzed_args)
 
