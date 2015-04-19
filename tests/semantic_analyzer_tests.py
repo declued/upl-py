@@ -157,6 +157,14 @@ class TestSemanticAnalyzer(UPLTestCase):
             };
         """)
 
+    def test_duplicate_identifier_3(self):
+        self.checkAnalyzeFails("""
+            def a = 1;
+            def f = (a: int) -> int {
+                a;
+            };
+        """)
+
     def test_return_type_check(self):
         self.checkAnalyzeFails("""
             def f = () -> bool { 1; };
