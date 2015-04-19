@@ -325,8 +325,6 @@ class SemanticAnalyzer(object):
             return BasicType.Bool
         elif parse_type == TokenType.KeywordReal:
             return BasicType.Real
-        else:
-            raise SemanticAnalyzerException("%s is not a valid type" % (parse_type, ))
 
     def resolve_type(self, node):
         """
@@ -343,6 +341,3 @@ class SemanticAnalyzer(object):
 
         elif isinstance(node, ConditionalAnalyzeNode):
             return self.resolve_type(node.on_true)
-
-        else:
-            raise SemanticAnalyzerException("could not resolve type for %s" % (node, ))
