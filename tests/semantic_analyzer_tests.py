@@ -2,6 +2,7 @@ import unittest
 from tests_common import UPLTestCase
 from upl import lexer, parser, semantic_analyzer, semantic_analyze_nodes
 from upl.semantic_analyze_nodes import FuncDefAnalyzeNode, BasicType
+from upl.exceptions import SemanticAnalyzerException
 import json
 
 TYPE_INT = "BasicType.Int"
@@ -98,6 +99,32 @@ class TestSemanticAnalyzer(UPLTestCase):
             {"body": {"type": "ConstantAnalyzeNode"}}
         ])
 
+    def test_conditional_error_1(self):
+        self.checkAnalyzeFails("""
+            def f = () -> int { if 1 then 2 else 3; };
+        """)
+
+    def test_conditional_error_2(self):
+        self.checkAnalyzeFails("""
+            def f = () -> int { if 1 < 2 then 2 else 3.0; };
+        """)
+
+    def test_identifier_error_1(self):
+        self.checkAnalyzeFails("""
+            def f = () -> int { b; };
+        """)
+
+    def test_identifier_error_2(self):
+        self.checkAnalyzeFails("""
+            def f = () -> int { 0; };
+            def g = () -> int { f; };
+        """)
+
+    def test_ignorable_expression(self):
+        self.checkSemanticTree("""
+            1 + 1;
+        """, [])
+
     def checkSemanticTree(self, program, partial_semantic_tree):
         tokens = lexer.tokenize_program(program)
         parse_tree = parser.Parser(tokens).parse()
@@ -107,3 +134,12 @@ class TestSemanticAnalyzer(UPLTestCase):
         semantic_tree_dict = [f.to_dict() for f in funcs]
 
         self.matchValues(semantic_tree_dict, partial_semantic_tree)
+
+    def checkAnalyzeFails(self, program):
+        tokens = lexer.tokenize_program(program)
+        parse_tree = parser.Parser(tokens).parse()
+        self.assertIsNotNone(parse_tree)
+
+        with self.assertRaises(SemanticAnalyzerException):
+            consts, funcs = semantic_analyzer.SemanticAnalyzer(parse_tree,
+                                                               STDLIB).analyze()

@@ -263,11 +263,6 @@ class SemanticAnalyzer(object):
         elif isinstance(node, ConditionalNode):
             return self.analyze_conditional(node, symtab)
 
-        else:
-            raise SemanticAnalyzerException("Unexpected %s" % (str(node), ),
-                                            node.location)
-
-
     def analyze_literal(self, type, value):
         """
         Analyze the given constant.
