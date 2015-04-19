@@ -77,7 +77,7 @@ class SemanticAnalyzer(object):
         This function raises a SemanticAnalyzerException if there are two
         functions with the same signature.
         """
-        func_defs = external_functions
+        func_defs = list(external_functions)
         for s in node.statements:
             if isinstance(s, DeclNode) and\
                isinstance(s.expression, FuncDefNode):

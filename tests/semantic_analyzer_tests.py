@@ -1,9 +1,22 @@
 import unittest
 from tests_common import UPLTestCase
 from upl import lexer, parser, semantic_analyzer, semantic_analyze_nodes
+from upl.semantic_analyze_nodes import FuncDefAnalyzeNode, BasicType
 import json
 
 TYPE_INT = "BasicType.Int"
+TYPE_BOOL = "BasicType.Bool"
+TYPE_REAL = "BasicType.Real"
+
+STDLIB = (
+    # Arithmetic
+    FuncDefAnalyzeNode("+", [BasicType.Int, BasicType.Int], BasicType.Int),
+    FuncDefAnalyzeNode("-", [BasicType.Int, BasicType.Int], BasicType.Int),
+    FuncDefAnalyzeNode("-", [BasicType.Int], BasicType.Int),
+
+    # Comparison
+    FuncDefAnalyzeNode("<", [BasicType.Int, BasicType.Int], BasicType.Bool),
+)
 
 class TestSemanticAnalyzer(UPLTestCase):
     def test_constant_function(self):
@@ -21,16 +34,17 @@ class TestSemanticAnalyzer(UPLTestCase):
 
     def test_reference_to_constant(self):
         self.checkSemanticTree("""
-            def some_constant = 10;
-            def f = () -> int
-            {
-                some_constant;
-            }
-        """, [{
-            "body": {
-                "type": "ConstantAnalyzeNode"
-            }
-        }])
+            def int_const = 10;
+            def bool_const = true;
+            def real_const = 10.0;
+            def int_func = () -> int { int_const; };
+            def bool_func = () -> bool { bool_const; };
+            def real_func = () -> real { real_const; };
+        """, [
+            {"body": { "type": "ConstantAnalyzeNode", "value_type": TYPE_INT }},
+            {"body": { "type": "ConstantAnalyzeNode", "value_type": TYPE_BOOL }},
+            {"body": { "type": "ConstantAnalyzeNode", "value_type": TYPE_REAL }}
+        ])
 
     def test_reference_to_arg(self):
         self.checkSemanticTree("""
@@ -53,6 +67,27 @@ class TestSemanticAnalyzer(UPLTestCase):
             {"body": {"type": "FuncCallAnalyzeNode"}}
         ])
 
+    def test_binary_operation(self):
+        self.checkSemanticTree("""
+            def f = () -> int { 1 + 1; };
+        """, [
+            {"body": {"type": "FuncCallAnalyzeNode"}}
+        ])
+
+    def test_unary_operation(self):
+        self.checkSemanticTree("""
+            def f = () -> int { -1; };
+        """, [
+            {"body": {"type": "FuncCallAnalyzeNode"}}
+        ])
+
+    def test_conditional(self):
+        self.checkSemanticTree("""
+            def f = (a: int) -> int { if a < 2 then a else f(a-1) + f(a-2);};
+        """, [
+            {"body": {"type": "ConditionalAnalyzeNode"}}
+        ])
+
     def test_multi_statement_body(self):
         self.checkSemanticTree("""
             def f = () -> int {
@@ -67,7 +102,8 @@ class TestSemanticAnalyzer(UPLTestCase):
         tokens = lexer.tokenize_program(program)
         parse_tree = parser.Parser(tokens).parse()
         self.assertIsNotNone(parse_tree)
-        consts, funcs = semantic_analyzer.SemanticAnalyzer(parse_tree).analyze()
+        consts, funcs = semantic_analyzer.SemanticAnalyzer(parse_tree,
+                                                           STDLIB).analyze()
         semantic_tree_dict = [f.to_dict() for f in funcs]
 
         self.matchValues(semantic_tree_dict, partial_semantic_tree)
