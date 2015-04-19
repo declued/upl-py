@@ -9,24 +9,74 @@ from upl.semantic_analyze_nodes import BasicType, FuncDefAnalyzeNode,\
                                        FuncCallAnalyzeNode, ConditionalAnalyzeNode
 from upl.exceptions import SemanticAnalyzerException
 
+
 class SemanticAnalyzer(object):
+    """
+    Semantic Analysis is the 3rd phase of compiling a program. The input to
+    this phase the parse tree, and the output is:
+
+      * Sematic tree for each of the functions in the program,
+      * List of constants and their types.
+
+    These assets can be used later to generate code for the program.
+
+    This phase also does the remaining checks for program's validity. This
+    includes:
+
+      * Type errors,
+      * Function resolution errors,
+      * Name override errors,
+      * and any other semantic errors.
+
+    If an error is caught in this phase, a SemanticAnalyzerException is raised.
+    """
+
     def __init__(self, parse_tree, external_functions=None):
+        """
+        Constructor for SemanticAnalyzer. Arguments are:
+
+          * parse_tree: Output of the parsing phase,
+          * external_functions: Array of FuncDefAnalyzeNode which includes all
+            of the functions in standard library. These nodes must have empty
+            bodies.
+        """
         self.parse_tree = parse_tree
         self.external_functions = external_functions or []
 
     def analyze(self):
+        """
+        Does the semantic analysis, and returns:
+
+          * Array of constants. Each constant is a (type, value) pair.
+          * Array of functions. Each function is a FuncDefAnalyzeNode.
+        """
+        # Create a list of internal and external functions.
         self.func_defs = self.get_func_defs(self.parse_tree,
                                             self.external_functions)
+        
+        # Create a unique list of constants.
         self.consts = self.get_consts(self.parse_tree)
         self.consts = list(set(self.consts))
+
+        # Initialize symbol table.
         symtab = self.initialize_symtab(self.func_defs)
+
+        # Analyze ...
         self.analyze_program(self.parse_tree, symtab)
 
+        # Remove external functions from the function list.
         self.func_defs = [f for f in self.func_defs if f.body is not None]
 
         return self.consts, self.func_defs
 
     def get_func_defs(self, node, external_functions):
+        """
+        Returns a list of all functions in the given parse tree, pluse the
+        given list of external functions.
+
+        This function raises a SemanticAnalyzerException if there are two
+        functions with the same signature.
+        """
         func_defs = external_functions
         for s in node.statements:
             if isinstance(s, DeclNode) and\
@@ -49,6 +99,10 @@ class SemanticAnalyzer(object):
         return func_defs
 
     def get_consts(self, node):
+        """
+        Recursively returns list of all constants in the parse tree. The result
+        is a list of (type, value) pairs.
+        """
         if isinstance(node, ProgramNode):
             return list(chain(*[self.get_consts(s) for s in node.statements]))
 
@@ -86,6 +140,17 @@ class SemanticAnalyzer(object):
             return []
 
     def initialize_symtab(self, func_defs):
+        """
+        Given function definitions, returns a symbol table. A symbol table is:
+
+          * A dictionary,
+          * Keys are names,
+          * Values are list of analyze nodes,
+          * If a value can contain multiple function definitions with same name
+            but different signatures,
+          * If a value contains something other than a function definition, it
+            contains only one item.
+        """
         symtab = {}
         for func_def in func_defs:
             if func_def.name not in symtab:
@@ -95,6 +160,9 @@ class SemanticAnalyzer(object):
         return symtab
 
     def analyze_program(self, node, symtab):
+        """
+        Analyze the given program.
+        """
         for s in node.statements:
             if not isinstance(s, DeclNode):
                 continue
@@ -118,6 +186,9 @@ class SemanticAnalyzer(object):
                                                                 symtab.copy())]
 
     def analyze_function_body(self, node, symtab):
+        """
+        Analyze the given function body.
+        """
         if len(node.statements) == 0:
             raise SemanticAnalyzerException("Empty function body", node.location)
 
@@ -163,6 +234,9 @@ class SemanticAnalyzer(object):
         raise SemanticAnalyzerException("Could not resolve function %s %s" % (name, str(arg_types)))
 
     def analyze_expression(self, node, symtab):
+        """
+        Analyze the given expression.
+        """
         if isinstance(node, BoolLiteralNode):
             return self.analyze_literal(BasicType.Bool, node.value)
 
@@ -195,10 +269,16 @@ class SemanticAnalyzer(object):
 
 
     def analyze_literal(self, type, value):
+        """
+        Analyze the given constant.
+        """
         return ConstantAnalyzeNode(self.consts.index((type, value)),
                                    self.consts)
 
     def analyze_identifier(self, name, symtab):
+        """
+        Analyze the given identifier.
+        """
         if name not in symtab:
             raise SemanticAnalyzerException("%s could not be resolved" % (name, ))
 
@@ -208,6 +288,9 @@ class SemanticAnalyzer(object):
         return symtab[name][0]
 
     def analyze_func_call(self, name, args, symtab):
+        """
+        Analyze the given function call.
+        """
         analyzed_args = [self.analyze_expression(arg, symtab) for arg in args]
         arg_types = [self.resolve_type(arg) for arg in analyzed_args]
         resolved_func = self.resolve_function(self.func_defs, name, arg_types)
@@ -215,6 +298,9 @@ class SemanticAnalyzer(object):
         return FuncCallAnalyzeNode(resolved_func, analyzed_args)
 
     def analyze_conditional(self, node, symtab):
+        """
+        Analyze the given conditional.
+        """
         condition = self.analyze_expression(node.condition, symtab)
         on_true = self.analyze_expression(node.on_true, symtab)
         on_false = self.analyze_expression(node.on_false, symtab)
@@ -230,6 +316,9 @@ class SemanticAnalyzer(object):
         return ConditionalAnalyzeNode(condition, on_true, on_false)
 
     def parse_to_analyze_type(self, parse_type):
+        """
+        Converts a type in parse tree to an analyzed type.
+        """
         if parse_type == TokenType.KeywordInt:
             return BasicType.Int
         elif parse_type == TokenType.KeywordBool:
@@ -240,6 +329,9 @@ class SemanticAnalyzer(object):
             raise SemanticAnalyzerException("%s is not a valid type" % (parse_type, ))
 
     def resolve_type(self, node):
+        """
+        Returns the value type of given analyze node.
+        """
         if isinstance(node, FuncArgAnalyzeNode):
             return node.type
 
