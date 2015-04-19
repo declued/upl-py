@@ -120,10 +120,67 @@ class TestSemanticAnalyzer(UPLTestCase):
             def g = () -> int { f; };
         """)
 
-    def test_ignorable_expression(self):
+    def test_ignorable_expression_1(self):
         self.checkSemanticTree("""
             1 + 1;
         """, [])
+
+    def test_ignorable_expression_2(self):
+        self.checkSemanticTree("""
+            def f = () -> int {
+                1 + 1;
+                5;
+            }
+        """, [
+            {"body": {"type": "ConstantAnalyzeNode"}}
+        ])
+
+    def test_duplicate_function(self):
+        self.checkAnalyzeFails("""
+            def f = () -> int {1;};
+            def f = () -> int {2;};
+        """)
+
+    def test_duplicate_identifier_1(self):
+        self.checkAnalyzeFails("""
+            def a = 1;
+            def a = 2;
+            def f = () -> int { a; };
+        """)
+
+    def test_duplicate_identifier_2(self):
+        self.checkAnalyzeFails("""
+            def f = () -> int {
+                def a = 1;
+                def a = 2;
+                a;
+            };
+        """)
+
+    def test_return_type_check(self):
+        self.checkAnalyzeFails("""
+            def f = () -> bool { 1; };
+        """)
+
+    def test_empty_function(self):
+        self.checkAnalyzeFails("""
+            def f = () -> bool {};
+        """)
+
+    def test_nested_function(self):
+        self.checkAnalyzeFails("""
+            def f = () -> bool {
+                def g = () -> bool {true;};
+                g();
+            }
+        """)
+
+    def test_invalid_return_value(self):
+        self.checkAnalyzeFails("""
+            def f = () -> bool {
+                def a = true;
+            }
+        """)
 
     def checkSemanticTree(self, program, partial_semantic_tree):
         tokens = lexer.tokenize_program(program)

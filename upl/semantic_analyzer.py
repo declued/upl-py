@@ -174,9 +174,6 @@ class SemanticAnalyzer(object):
                                                  s.identifier, arg_types)
                 func_body = self.analyze_function_body(s.expression,
                                                        symtab.copy())
-                if self.resolve_type(func_body) != func_def.return_type:
-                    raise SemanticAnalyzerException("Return type mismatch",
-                                                    s.location)
                 func_def.body = func_body
             elif s.identifier in symtab:
                 raise SemanticAnalyzerException("Duplicate identifier %s"\
